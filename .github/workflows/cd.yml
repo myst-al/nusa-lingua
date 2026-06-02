@@ -1,0 +1,100 @@
+name: CD — Deploy to Production
+
+# Trigger pada push ke main (atau manual)
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false  # JANGAN cancel deploy yang lagi jalan
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  deploy:
+    name: 🚀 Deploy to VPS
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    # Hanya jalan kalau CI sebelumnya pass (manual gating bisa pakai environments)
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # ============================================================
+      # Build artifacts locally di runner
+      # ============================================================
+      - name: Install deps
+        run: |
+          npm --prefix server ci --no-audit --no-fund
+          npm --prefix client ci --no-audit --no-fund
+
+      - name: Build server
+        run: npm --prefix server run build
+
+      - name: Build client
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: npm --prefix client run build
+
+      # ============================================================
+      # Deploy via SSH (rsync + restart PM2)
+      # ============================================================
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Rsync client build
+        run: |
+          rsync -avz --delete \
+            client/dist/ \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/nusalingua/
+
+      - name: Rsync server build
+        run: |
+          rsync -avz --delete \
+            server/dist/ \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/nusalingua-mvp/server/dist/
+
+      - name: Restart PM2 (graceful reload)
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            "cd /home/${{ secrets.SSH_USER }}/nusalingua-mvp && pm2 reload nusalingua-server"
+
+      # ============================================================
+      # Post-deploy smoke test
+      # ============================================================
+      - name: Smoke test production
+        run: |
+          sleep 5
+          status=$(curl -s -o /dev/null -w "%{http_code}" https://${{ secrets.DEPLOY_DOMAIN }}/api/health)
+          if [ "$status" != "200" ]; then
+            echo "❌ Health check failed (HTTP $status)"
+            exit 1
+          fi
+          echo "✅ Production deployed and healthy"
+
+      # ============================================================
+      # Notify (opsional — Slack/Discord/email)
+      # ============================================================
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "⚠️ Deployment failed! Cek logs di GitHub Actions."
+          # curl -X POST -H 'Content-type: application/json' \
+          #   --data "{\"text\":\"NusaLingua deploy failed: ${{ github.sha }}\"}" \
+          #   ${{ secrets.SLACK_WEBHOOK_URL }}

@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+# NusaLingua pre-commit hook
+# Memenuhi QA Master Plan §10 (tooling: Husky + lint-staged) dan
+# Definition of Done Level 1 (lint passing sebelum commit).
+
+# Hanya jalankan lint-staged untuk file yang di-stage — tidak perlu lint seluruh repo.
+npx lint-staged
+
+# Cek hardcoded secret (regex sederhana) — guard tambahan, CI tetap full scan.
+STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|json|env)$' || true)
+if [ -n "$STAGED" ]; then
+  if echo "$STAGED" | xargs grep -lE "(sk-[a-zA-Z0-9]{20,}|AIza[a-zA-Z0-9_-]{35}|eyJ[a-zA-Z0-9._-]{100,})" 2>/dev/null; then
+    echo ""
+    echo "❌ Potential hardcoded secret detected in staged files."
+    echo "   Move sensitive values to .env (mode 600) and use process.env.*"
+    exit 1
+  fi
+fi
+
+echo "✅ pre-commit OK"

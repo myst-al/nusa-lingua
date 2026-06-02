@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 Security Vulnerability Report
+    url: https://github.com/<org>/<repo>/security/advisories/new
+    about: Laporan kerentanan keamanan harus melalui Private Security Advisory, bukan issue publik. Lihat docs/qa/BUG-TRIAGE.md §8.1.
+  - name: 💬 Diskusi & Pertanyaan
+    url: https://github.com/<org>/<repo>/discussions
+    about: Untuk pertanyaan umum, sharing, atau ide yang belum siap jadi feature request.
+  - name: 📖 Dokumentasi QA
+    url: ./docs/qa/README.md
+    about: QA Master Plan, QC Checklist, Test Strategy, Definition of Done, Bug Triage Matrix.

@@ -1,0 +1,13 @@
+node_modules
+dist
+build
+coverage
+.next
+.vite
+client/dist
+server/dist
+*.min.js
+*.min.css
+package-lock.json
+playwright-report
+test-results

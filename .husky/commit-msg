@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+# Conventional Commits validation — soft enforcement.
+# Format: type(scope): subject
+# Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build, revert
+
+commit_msg=$(cat "$1")
+pattern='^(feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert)(\([a-z0-9-]+\))?: .{1,72}'
+
+if ! echo "$commit_msg" | grep -qE "$pattern"; then
+  echo "⚠️  Commit message tidak mengikuti Conventional Commits."
+  echo "   Format: <type>(<scope>): <subject>"
+  echo "   Contoh: feat(chat): tambah dukungan bahasa Bugis"
+  echo ""
+  echo "   Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build, revert"
+  echo ""
+  echo "   (Commit tetap diterima — ini soft warning. Untuk hard enforce, ubah exit 0 → exit 1.)"
+  exit 0
+fi

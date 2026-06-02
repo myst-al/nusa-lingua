@@ -1,0 +1,57 @@
+# ============================================================
+# NusaLingua — systemd service (ALTERNATIF PM2)
+# ============================================================
+# Kalau lebih prefer systemd dari PM2:
+#   sudo cp deploy/nusalingua.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable nusalingua
+#   sudo systemctl start nusalingua
+#   sudo systemctl status nusalingua
+#   sudo journalctl -u nusalingua -f   # live logs
+#
+# Ganti USER & HOME path ke user kamu sebelum copy.
+# ============================================================
+
+[Unit]
+Description=NusaLingua Node.js Server
+Documentation=https://github.com/nusalingua
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+
+WorkingDirectory=/home/ubuntu/nusalingua-mvp
+EnvironmentFile=/home/ubuntu/nusalingua-mvp/.env
+
+# Path ke compiled output
+ExecStart=/usr/bin/node /home/ubuntu/nusalingua-mvp/server/dist/server/src/index.js
+
+# Restart on failure
+Restart=always
+RestartSec=10
+StartLimitInterval=60
+StartLimitBurst=5
+
+# Resource limits
+LimitNOFILE=65535
+MemoryMax=500M
+
+# Logs ke journald
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=nusalingua
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/home/ubuntu/nusalingua-mvp/logs
+ProtectHome=read-only
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+
+[Install]
+WantedBy=multi-user.target

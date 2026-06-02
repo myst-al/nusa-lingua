@@ -1,0 +1,18 @@
+# File ini tidak digunakan lagi — kita pakai Supabase (cloud Postgres + Auth).
+#
+# Kalau mau Postgres lokal untuk testing offline, uncomment di bawah:
+#
+# version: "3.9"
+# services:
+#   postgres:
+#     image: postgres:16-alpine
+#     environment:
+#       POSTGRES_USER: nusalingua
+#       POSTGRES_PASSWORD: nusalingua
+#       POSTGRES_DB: nusalingua
+#     ports:
+#       - "5432:5432"
+#     volumes:
+#       - pgdata:/var/lib/postgresql/data
+# volumes:
+#   pgdata:

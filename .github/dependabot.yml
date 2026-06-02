@@ -1,0 +1,58 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Jakarta"
+    open-pull-requests-limit: 5
+    labels: ["deps", "automerge-candidate"]
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+
+  - package-ecosystem: "npm"
+    directory: "/server"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels: ["deps", "area:server"]
+    commit-message:
+      prefix: "chore(deps-server)"
+      include: "scope"
+    groups:
+      production:
+        dependency-type: "production"
+        patterns: ["*"]
+      development:
+        dependency-type: "development"
+        patterns: ["*"]
+
+  - package-ecosystem: "npm"
+    directory: "/client"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels: ["deps", "area:client"]
+    commit-message:
+      prefix: "chore(deps-client)"
+      include: "scope"
+    groups:
+      production:
+        dependency-type: "production"
+        patterns: ["*"]
+      development:
+        dependency-type: "development"
+        patterns: ["*"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    labels: ["deps", "area:ci"]
+    commit-message:
+      prefix: "chore(actions)"

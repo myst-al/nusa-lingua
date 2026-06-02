@@ -1,0 +1,48 @@
+{
+  "name": "nusalingua-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "NusaLingua MVP - Multibahasa Nusantara LLM Platform",
+  "scripts": {
+    "dev": "concurrently -n client,server -c green,blue \"npm --prefix client run dev\" \"npm --prefix server run dev\"",
+    "build": "npm --prefix client run build && npm --prefix server run build",
+    "start": "npm --prefix server run start",
+    "db:push": "npm --prefix server run db:push",
+    "db:seed": "npm --prefix server run db:seed",
+    "lint": "eslint \"{server,client,shared}/**/*.{ts,tsx}\" --max-warnings=20",
+    "lint:fix": "eslint \"{server,client,shared}/**/*.{ts,tsx}\" --fix",
+    "format": "prettier --write \"{server,client,shared}/**/*.{ts,tsx,json,md}\"",
+    "format:check": "prettier --check \"{server,client,shared}/**/*.{ts,tsx,json,md}\"",
+    "typecheck": "npm --prefix server exec -- tsc --noEmit && npm --prefix client exec -- tsc -b --noEmit",
+    "test": "npm --prefix server run test && npm --prefix client run test -- --run",
+    "test:unit": "npm --prefix client run test -- --run",
+    "test:integration": "npm --prefix server run test",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "qa:all": "npm run lint && npm run typecheck && npm run test && npm run test:e2e",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "@types/node": "^20.16.5",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react": "^7.37.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix --max-warnings=20",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  }
+}

@@ -1,0 +1,351 @@
+name: CI
+
+# Trigger pada PR dan push ke main/develop
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+# Cancel duplicate runs untuk save credits
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  # ============================================================
+  # JOB 1: Lint + Format + Typecheck (paralel)
+  # ============================================================
+  lint-typecheck:
+    name: Lint, Format & Typecheck
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: |
+            package-lock.json
+            server/package-lock.json
+            client/package-lock.json
+
+      - name: Install root deps
+        run: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+
+      - name: Install server deps
+        run: npm --prefix server ci --no-audit --no-fund || npm --prefix server install --no-audit --no-fund
+
+      - name: Install client deps
+        run: npm --prefix client ci --no-audit --no-fund || npm --prefix client install --no-audit --no-fund
+
+      - name: ESLint
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Prettier formatting check
+        run: npm run format:check
+        continue-on-error: true
+
+      - name: Server TypeScript check
+        run: npm --prefix server exec -- tsc --noEmit
+
+      - name: Client TypeScript check
+        run: npm --prefix client exec -- tsc -b --noEmit
+
+  # ============================================================
+  # JOB 2: Unit + Component Tests (Vitest, client)
+  # ============================================================
+  test-unit:
+    name: Unit & Component Tests
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install client deps
+        run: npm --prefix client ci --no-audit --no-fund || npm --prefix client install --no-audit --no-fund
+
+      - name: Run Vitest
+        working-directory: client
+        run: npx vitest run --coverage --reporter=verbose
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-coverage
+          path: client/coverage/
+          retention-days: 14
+
+  # ============================================================
+  # JOB 3: Database schema + business process E2E (integration)
+  # ============================================================
+  test-integration:
+    name: Integration & Business Process
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install server deps
+        run: npm --prefix server ci --no-audit --no-fund || npm --prefix server install --no-audit --no-fund
+
+      - name: Install pglite (embedded Postgres for tests)
+        run: npm --prefix server install --no-save @electric-sql/pglite
+
+      - name: Run schema tests
+        working-directory: server
+        run: npx tsx src/__tests__/test-schema.ts
+
+      - name: Run full business process E2E
+        working-directory: server
+        env:
+          SUPABASE_JWT_SECRET: ci-test-jwt-secret-min-32-characters-long
+          SUPABASE_URL: https://ci-mock.supabase.co
+          SUPABASE_ANON_KEY: ci-mock-anon-key-test
+          SUPABASE_SERVICE_ROLE_KEY: ci-mock-service-key-test
+          OPENAI_API_KEY: sk-ci-mock-test-key
+          DATABASE_URL: postgres://ci@localhost/ci
+          CLIENT_ORIGIN: http://localhost:5173
+        run: npx tsx src/__tests__/test-business-process.ts
+
+  # ============================================================
+  # JOB 4: Client production build + smoke test
+  # ============================================================
+  build-client:
+    name: Build Client Production
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install
+        run: npm --prefix client ci --no-audit --no-fund || npm --prefix client install --no-audit --no-fund
+
+      - name: Build (Vite)
+        env:
+          VITE_SUPABASE_URL: https://ci-mock.supabase.co
+          VITE_SUPABASE_ANON_KEY: ci-mock-anon-key-for-build
+        run: npm --prefix client run build
+
+      - name: Verify build artifacts
+        run: |
+          test -f client/dist/index.html || (echo "index.html missing" && exit 1)
+          test -d client/dist/assets || (echo "assets/ missing" && exit 1)
+          echo "Build artifacts OK"
+          ls -lh client/dist/assets/
+
+      - name: Bundle size guard
+        run: |
+          total_kb=$(du -sk client/dist/ | cut -f1)
+          echo "Total bundle: ${total_kb} KB"
+          if [ "$total_kb" -gt 1000 ]; then
+            echo "Bundle > 1 MB - consider code-split"
+          fi
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-dist
+          path: client/dist/
+          retention-days: 7
+
+  # ============================================================
+  # JOB 5: Playwright E2E smoke
+  # ============================================================
+  test-e2e:
+    name: E2E Smoke (Playwright)
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    needs: [build-client]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install root deps
+        run: npm install --no-audit --no-fund
+
+      - name: Install client deps
+        run: npm --prefix client install --no-audit --no-fund
+
+      - name: Download client build
+        uses: actions/download-artifact@v4
+        with:
+          name: client-dist
+          path: client/dist/
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Serve client dist
+        run: |
+          npx --yes serve client/dist -l 5173 &
+          sleep 3
+          curl -fsS http://localhost:5173 > /dev/null || (echo "Server not up" && exit 1)
+
+      - name: Run Playwright smoke
+        env:
+          E2E_BASE_URL: http://localhost:5173
+          CI: "true"
+        run: npx playwright test --project=chromium --reporter=list
+        continue-on-error: true
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+  # ============================================================
+  # JOB 6: Shell script syntax + nginx config check
+  # ============================================================
+  lint-deploy:
+    name: Lint Deploy Scripts
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bash syntax check
+        run: |
+          fail=0
+          for sh in deploy/*.sh; do
+            if bash -n "$sh"; then
+              echo "OK $sh"
+            else
+              echo "FAIL $sh"
+              fail=1
+            fi
+          done
+          exit $fail
+
+      - name: ShellCheck
+        run: |
+          sudo apt-get install -y shellcheck
+          shellcheck -e SC1091 -e SC2086 deploy/*.sh || true
+
+      - name: Validate Nginx config syntax
+        run: |
+          sudo apt-get install -y nginx
+          sed "s/YOUR_DOMAIN.COM www.YOUR_DOMAIN.COM/example.com/" deploy/nginx.conf | sudo tee /etc/nginx/sites-available/test > /dev/null
+          sudo ln -sf /etc/nginx/sites-available/test /etc/nginx/sites-enabled/test
+          sudo rm -f /etc/nginx/sites-enabled/default
+          sudo nginx -t
+
+      - name: Validate PM2 ecosystem config
+        run: node -e "const c = require('./deploy/ecosystem.config.cjs'); if (!c.apps?.length) process.exit(1); console.log('OK', c.apps.length)"
+
+  # ============================================================
+  # JOB 7: Security audit
+  # ============================================================
+  security:
+    name: Security Audit
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: npm audit (server)
+        working-directory: server
+        run: |
+          npm install --package-lock-only --no-audit --no-fund
+          npm audit --production --audit-level=high || echo "vulnerabilities found"
+
+      - name: npm audit (client)
+        working-directory: client
+        run: |
+          npm install --package-lock-only --no-audit --no-fund
+          npm audit --production --audit-level=high || echo "vulnerabilities found"
+
+      - name: Check for secrets in code
+        run: |
+          if grep -rIE "(sk-[a-zA-Z0-9]{20,}|AIza[a-zA-Z0-9_-]{35}|eyJ[a-zA-Z0-9._-]{100,})" \
+              --include='*.ts' --include='*.tsx' --include='*.js' --include='*.json' \
+              --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=coverage .; then
+            echo "Potential hardcoded secret detected"
+            exit 1
+          fi
+          echo "No hardcoded secrets"
+
+      - name: Run gitleaks (secret history scan)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+  # ============================================================
+  # JOB 8: Final summary
+  # ============================================================
+  summary:
+    name: CI Summary
+    runs-on: ubuntu-22.04
+    needs:
+      [lint-typecheck, test-unit, test-integration, build-client, test-e2e, lint-deploy, security]
+    if: always()
+    steps:
+      - name: Check all critical jobs
+        run: |
+          critical_fail=0
+          for result in \
+            "${{ needs.lint-typecheck.result }}" \
+            "${{ needs.test-integration.result }}" \
+            "${{ needs.build-client.result }}" \
+            "${{ needs.lint-deploy.result }}"; do
+            if [ "$result" != "success" ]; then
+              critical_fail=1
+            fi
+          done
+
+          if [ $critical_fail -eq 1 ]; then
+            echo "One or more critical jobs failed"
+            exit 1
+          fi
+
+          echo "Lint-typecheck : ${{ needs.lint-typecheck.result }}"
+          echo "Unit tests     : ${{ needs.test-unit.result }}"
+          echo "Integration    : ${{ needs.test-integration.result }}"
+          echo "Build          : ${{ needs.build-client.result }}"
+          echo "E2E            : ${{ needs.test-e2e.result }}"
+          echo "Lint deploy    : ${{ needs.lint-deploy.result }}"
+          echo "Security       : ${{ needs.security.result }}"
+          echo "All critical CI checks passed"

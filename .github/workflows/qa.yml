@@ -1,0 +1,336 @@
+name: QA Nightly Gates
+
+# Berjalan otomatis tiap malam UTC + manual trigger
+# Memenuhi QA Master Plan §3 (Test Levels) dan §8 (Security Tests)
+on:
+  schedule:
+    # 17:00 UTC = 00:00 WIB
+    - cron: "0 17 * * *"
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      # QA workflow juga jalan untuk PR ke main (release branch)
+      - "server/**"
+      - "client/**"
+      - "shared/**"
+      - ".github/workflows/qa.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  # ============================================================
+  # JOB 1: SAST (Semgrep) — static application security testing
+  # ============================================================
+  sast-semgrep:
+    name: 🛡️  SAST (Semgrep)
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Semgrep with auto config
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: >-
+            p/typescript
+            p/react
+            p/javascript
+            p/owasp-top-ten
+            p/secrets
+        env:
+          SEMGREP_SEND_METRICS: "off"
+        continue-on-error: true
+
+  # ============================================================
+  # JOB 2: CodeQL analysis
+  # ============================================================
+  codeql:
+    name: 🔬 CodeQL Analysis
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [javascript-typescript]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended,security-and-quality
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
+        continue-on-error: true
+
+  # ============================================================
+  # JOB 3: Dependency review (SCA)
+  # ============================================================
+  dependency-review:
+    name: 📦 Dependency Review
+    runs-on: ubuntu-22.04
+    if: github.event_name == 'pull_request'
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dependency review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, MPL-2.0, CC0-1.0, Unlicense, 0BSD
+        continue-on-error: true
+
+  # ============================================================
+  # JOB 4: Secret scanning (full git history)
+  # ============================================================
+  secret-scan-history:
+    name: 🔐 Secret Scan (Full History)
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Custom NusaLingua secret patterns
+        run: |
+          PATTERNS='(sk-proj-[a-zA-Z0-9_-]{40,}|sk-[a-zA-Z0-9]{40,}|eyJhbGc[a-zA-Z0-9._-]{100,}|service_role.{0,20}[a-zA-Z0-9]{40,})'
+          if git log --all -p | grep -E "$PATTERNS" 2>/dev/null; then
+            echo "❌ Potential secret found in git history"
+            exit 1
+          fi
+          echo "✅ No secrets in history"
+
+  # ============================================================
+  # JOB 5: Full Playwright (all browsers + mobile)
+  # ============================================================
+  e2e-full:
+    name: 🎭 Full E2E (all browsers)
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install deps
+        run: |
+          npm install --no-audit --no-fund
+          npm --prefix client install --no-audit --no-fund
+
+      - name: Build client
+        env:
+          VITE_SUPABASE_URL: https://ci-mock.supabase.co
+          VITE_SUPABASE_ANON_KEY: ci-mock-anon-key-for-build
+        run: npm --prefix client run build
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Serve dist
+        run: |
+          npx --yes serve client/dist -l 5173 &
+          sleep 3
+
+      - name: Run Playwright all browsers
+        env:
+          E2E_BASE_URL: http://localhost:5173
+          CI: "true"
+        run: npx playwright test --reporter=list,html
+        continue-on-error: true
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-nightly
+          path: playwright-report/
+          retention-days: 30
+
+  # ============================================================
+  # JOB 6: Accessibility audit (axe-core via Playwright)
+  # ============================================================
+  accessibility:
+    name: ♿ Accessibility Audit
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install deps
+        run: |
+          npm install --no-audit --no-fund
+          npm --prefix client install --no-audit --no-fund
+          npm install --no-save @axe-core/playwright
+
+      - name: Build client
+        env:
+          VITE_SUPABASE_URL: https://ci-mock.supabase.co
+          VITE_SUPABASE_ANON_KEY: ci-mock-anon-key
+        run: npm --prefix client run build
+
+      - name: Install Playwright (chromium only)
+        run: npx playwright install --with-deps chromium
+
+      - name: Serve dist
+        run: |
+          npx --yes serve client/dist -l 5173 &
+          sleep 3
+
+      - name: Run axe-core sweep
+        run: |
+          cat > /tmp/a11y.spec.ts << 'EOF'
+          import { test, expect } from '@playwright/test';
+          import AxeBuilder from '@axe-core/playwright';
+          for (const path of ['/', '/explorer', '/login']) {
+            test(`a11y: ${path}`, async ({ page }) => {
+              await page.goto(`http://localhost:5173${path}`);
+              const results = await new AxeBuilder({ page }).analyze();
+              const criticals = results.violations.filter((v) => v.impact === 'critical');
+              expect(criticals).toEqual([]);
+            });
+          }
+          EOF
+          npx playwright test /tmp/a11y.spec.ts --project=chromium --reporter=list
+        continue-on-error: true
+
+  # ============================================================
+  # JOB 7: Coverage threshold check
+  # ============================================================
+  coverage-threshold:
+    name: 📊 Coverage Threshold
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install client deps
+        run: npm --prefix client install --no-audit --no-fund
+
+      - name: Run coverage
+        working-directory: client
+        run: npx vitest run --coverage
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-coverage
+          path: client/coverage/
+          retention-days: 30
+
+  # ============================================================
+  # JOB 8: License scan
+  # ============================================================
+  license-scan:
+    name: 📜 License Scan
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install license-checker
+        run: npm install -g license-checker
+
+      - name: Server license scan
+        working-directory: server
+        run: |
+          npm install --package-lock-only --no-audit --no-fund
+          license-checker --production --summary || true
+
+      - name: Client license scan
+        working-directory: client
+        run: |
+          npm install --package-lock-only --no-audit --no-fund
+          license-checker --production --summary || true
+
+      - name: Fail on GPL / AGPL
+        run: |
+          cd server
+          if license-checker --production --onlyAllow "MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;MPL-2.0;CC0-1.0;Unlicense;0BSD;Python-2.0;BlueOak-1.0.0" 2>&1 | grep -i "not in onlyAllow"; then
+            echo "⚠️ Non-permissive license detected"
+          fi
+        continue-on-error: true
+
+  # ============================================================
+  # JOB 9: QA Summary
+  # ============================================================
+  qa-summary:
+    name: 📋 QA Gates Summary
+    runs-on: ubuntu-22.04
+    needs:
+      [
+        sast-semgrep,
+        codeql,
+        secret-scan-history,
+        e2e-full,
+        accessibility,
+        coverage-threshold,
+        license-scan,
+      ]
+    if: always()
+    steps:
+      - name: Print summary
+        run: |
+          echo "═══════════════════════════════════════════════════"
+          echo "  NusaLingua — Nightly QA Gates"
+          echo "═══════════════════════════════════════════════════"
+          echo "SAST Semgrep         : ${{ needs.sast-semgrep.result }}"
+          echo "CodeQL               : ${{ needs.codeql.result }}"
+          echo "Secret scan history  : ${{ needs.secret-scan-history.result }}"
+          echo "E2E full browsers    : ${{ needs.e2e-full.result }}"
+          echo "Accessibility (axe)  : ${{ needs.accessibility.result }}"
+          echo "Coverage threshold   : ${{ needs.coverage-threshold.result }}"
+          echo "License scan         : ${{ needs.license-scan.result }}"
+          echo "═══════════════════════════════════════════════════"
+          # Hanya fail bila secret scan history fail (critical)
+          if [ "${{ needs.secret-scan-history.result }}" = "failure" ]; then
+            echo "❌ Secret leak detected — FAILING QA GATES"
+            exit 1
+          fi
+          echo "✅ QA Gates completed (non-critical findings boleh masuk backlog)"

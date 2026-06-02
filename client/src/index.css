@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-stone-50 text-ink font-sans;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all;
+  }
+  .btn-primary {
+    @apply btn bg-primary text-white hover:bg-primary-700;
+  }
+  .btn-outline {
+    @apply btn bg-white text-ink border border-line hover:border-primary hover:text-primary;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent text-ink-soft hover:bg-primary-50 hover:text-primary;
+  }
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs rounded-lg;
+  }
+  .btn-lg {
+    @apply px-5 py-3 text-base rounded-xl;
+  }
+
+  .card {
+    @apply bg-white border border-line rounded-2xl;
+  }
+
+  .pill {
+    @apply inline-block px-2.5 py-1 rounded-full text-xs font-bold;
+  }
+  .pill-primary {
+    @apply pill bg-primary-50 text-primary-700 border border-primary-200;
+  }
+  .pill-success {
+    @apply pill bg-green-100 text-green-700;
+  }
+  .pill-warning {
+    @apply pill bg-amber-100 text-amber-700;
+  }
+  .pill-info {
+    @apply pill bg-blue-100 text-blue-700;
+  }
+
+  .input-field {
+    @apply w-full px-3 py-2 border border-line rounded-lg text-sm bg-white outline-none focus:border-primary focus:ring-2 focus:ring-primary-100;
+    font-family: inherit;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d6d3d1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a29e;
+}
