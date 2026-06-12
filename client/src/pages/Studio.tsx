@@ -256,9 +256,10 @@ export default function Studio() {
         </div>
       )}
 
-      <div className="grid grid-cols-[260px_1fr_320px] flex-1 min-h-0">
+      {/* Mobile: panel di-stack (canvas dulu); Desktop lg: 3 kolom */}
+      <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr_320px] flex-1 min-h-0 overflow-y-auto lg:overflow-visible">
         {/* LEFT: Palette + bots list */}
-        <aside className="bg-stone-50 border-r border-line p-4 overflow-y-auto">
+        <aside className="bg-stone-50 border-y lg:border-y-0 lg:border-r border-line p-4 overflow-y-auto max-h-80 lg:max-h-none order-2 lg:order-none">
           <div className="text-[10px] uppercase tracking-widest text-ink-mute font-bold mb-2">
             Bot Kamu ({bots.length})
           </div>
@@ -306,7 +307,7 @@ export default function Studio() {
         </aside>
 
         {/* CENTER: Canvas */}
-        <main className="bg-stone-100 overflow-y-auto p-6">
+        <main className="bg-stone-100 overflow-y-auto p-4 md:p-6 order-1 lg:order-none">
           <div className="mb-4">
             <input
               value={draft.name ?? ""}
@@ -352,7 +353,7 @@ export default function Studio() {
         </main>
 
         {/* RIGHT: Properties */}
-        <aside className="bg-stone-50 border-l border-line p-5 overflow-y-auto">
+        <aside className="bg-stone-50 lg:border-l border-line p-5 overflow-y-auto max-h-96 lg:max-h-none order-3 lg:order-none">
           <div className="text-sm font-bold mb-3.5">
             {selectedNode ? "Properti Node" : "Properti Bot"}
           </div>

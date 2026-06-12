@@ -69,7 +69,7 @@ export default function Explorer() {
               Pilih bahasa untuk mulai percakapan dengan NusaLingua.
             </p>
           </div>
-          <div className="bg-white border border-line rounded-xl px-3.5 py-2.5 flex items-center gap-2.5 min-w-[320px]">
+          <div className="bg-white border border-line rounded-xl px-3.5 py-2.5 flex items-center gap-2.5 w-full sm:w-auto sm:min-w-[320px]">
             <span>🔍</span>
             <input
               value={search}
@@ -84,7 +84,7 @@ export default function Explorer() {
         {isLoading ? (
           <div className="text-center text-ink-mute py-20">Memuat bahasa...</div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {filtered.map((lang) => (
               <button
                 key={lang.code}

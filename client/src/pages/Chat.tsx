@@ -13,6 +13,7 @@ export default function Chat() {
   const [input, setInput] = useState("");
   const [streamingText, setStreamingText] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // drawer mobile
   const bodyRef = useRef<HTMLDivElement>(null);
 
   // Load conversations (sidebar)
@@ -62,7 +63,20 @@ export default function Chat() {
       languageCode,
     });
     qc.invalidateQueries({ queryKey: ["conversations"] });
+    setSidebarOpen(false);
     navigate(`/chat/${convo.id}`);
+  }
+
+  async function handleDeleteConversation(id: string) {
+    if (!confirm("Hapus percakapan ini beserta seluruh pesannya?")) return;
+    try {
+      await api.deleteConversation(id);
+      qc.invalidateQueries({ queryKey: ["conversations"] });
+      if (id === conversationId) navigate("/chat", { replace: true });
+    } catch (err) {
+      console.error(err);
+      alert("Gagal menghapus percakapan.");
+    }
   }
 
   async function handleSend() {
@@ -134,9 +148,21 @@ export default function Chat() {
         }
       />
 
-      <div className="grid grid-cols-[280px_1fr] flex-1 min-h-0">
-        {/* SIDEBAR */}
-        <aside className="bg-stone-50 border-r border-line flex flex-col">
+      <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] flex-1 min-h-0">
+        {/* Backdrop drawer (mobile) */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/30 z-30 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        {/* SIDEBAR — drawer di mobile, kolom statis di desktop */}
+        <aside
+          className={`${
+            sidebarOpen ? "flex" : "hidden"
+          } md:flex fixed md:static inset-y-0 left-0 z-40 w-72 md:w-auto bg-stone-50 border-r border-line flex-col`}
+        >
           <div className="p-4">
             <button
               className="btn-primary w-full"
@@ -155,17 +181,31 @@ export default function Chat() {
               </div>
             )}
             {conversations.map((c) => (
-              <button
+              <div
                 key={c.id}
-                onClick={() => navigate(`/chat/${c.id}`)}
-                className={`w-full text-left px-3 py-2.5 rounded-lg text-sm mb-1 transition-colors ${
+                onClick={() => {
+                  setSidebarOpen(false);
+                  navigate(`/chat/${c.id}`);
+                }}
+                className={`group flex items-center gap-1 w-full text-left px-3 py-2.5 rounded-lg text-sm mb-1 transition-colors cursor-pointer ${
                   c.id === conversationId
                     ? "bg-primary-50 text-primary-700 font-semibold"
                     : "text-ink-soft hover:bg-primary-50 hover:text-primary"
                 }`}
               >
-                💬 {c.title}
-              </button>
+                <span className="flex-1 truncate">💬 {c.title}</span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteConversation(c.id);
+                  }}
+                  className="shrink-0 w-6 h-6 rounded flex items-center justify-center text-xs text-ink-mute hover:text-red-600 hover:bg-red-50 opacity-60 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                  title="Hapus percakapan"
+                  aria-label={`Hapus ${c.title}`}
+                >
+                  🗑
+                </button>
+              </div>
             ))}
           </div>
 
@@ -205,12 +245,20 @@ export default function Chat() {
             />
           ) : (
             <>
-              <div className="px-6 py-3.5 border-b border-line flex items-center justify-between">
-                <div>
-                  <div className="font-bold text-sm">
+              <div className="px-4 md:px-6 py-3.5 border-b border-line flex items-center gap-3">
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="md:hidden shrink-0 w-9 h-9 rounded-lg border border-line flex items-center justify-center text-ink-soft hover:border-primary hover:text-primary"
+                  title="Daftar percakapan"
+                  aria-label="Buka daftar percakapan"
+                >
+                  ☰
+                </button>
+                <div className="min-w-0">
+                  <div className="font-bold text-sm truncate">
                     {currentConvo?.title ?? "Memuat..."}
                   </div>
-                  <div className="text-[11px] text-ink-mute">
+                  <div className="text-[11px] text-ink-mute truncate">
                     Model: NusaLingua-Core (GPT-4o backend) · Bahasa:{" "}
                     {currentLanguage?.name}
                   </div>

@@ -75,7 +75,7 @@ export default function Login() {
   return (
     <div className="min-h-screen grid md:grid-cols-2">
       {/* LEFT: Brand panel */}
-      <div className="bg-gradient-to-br from-primary-500 to-primary-700 text-white p-12 flex flex-col justify-between">
+      <div className="bg-gradient-to-br from-primary-500 to-primary-700 text-white p-8 md:p-12 flex flex-col justify-between gap-8">
         <Link to="/" className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center font-extrabold">
             N
@@ -103,7 +103,7 @@ export default function Login() {
       </div>
 
       {/* RIGHT: Form */}
-      <div className="bg-white p-12 flex items-center justify-center">
+      <div className="bg-white p-8 md:p-12 flex items-center justify-center">
         <form onSubmit={handleSubmit} className="w-full max-w-sm">
           <h3 className="text-2xl font-extrabold mb-1">
             {mode === "signin" ? "Masuk ke akun" : "Buat akun baru"}

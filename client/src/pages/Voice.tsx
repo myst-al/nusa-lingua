@@ -148,7 +148,7 @@ export default function Voice() {
           <button
             onClick={handleStart}
             disabled={status === "connecting"}
-            className={`w-56 h-56 rounded-full mx-auto mb-7 cursor-pointer shadow-2xl shadow-primary/30 transition-transform ${
+            className={`block w-56 h-56 rounded-full mx-auto mb-7 cursor-pointer shadow-2xl shadow-primary/30 transition-transform ${
               isActive ? "animate-pulse-soft scale-105" : ""
             } ${status === "connecting" ? "opacity-70" : ""}`}
             style={{

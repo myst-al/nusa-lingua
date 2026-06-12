@@ -81,7 +81,11 @@ export default function Landing() {
         </div>
         {stats?.updatedAt && (
           <div className="text-[10px] text-ink-mute mt-3">
-            Data live • diperbarui {new Date(stats.updatedAt).toLocaleTimeString("id-ID")}
+            Data live • diperbarui{" "}
+            {new Date(stats.updatedAt).toLocaleTimeString("id-ID", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
           </div>
         )}
       </section>
@@ -137,6 +141,40 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* FOOTER */}
+      <footer className="border-t border-line bg-white">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white font-extrabold text-sm">
+              N
+            </div>
+            <span className="font-extrabold text-sm">
+              Nusa<span className="text-primary">Lingua</span>
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-ink-soft">
+            <Link to="/explorer" className="hover:text-primary">
+              Jelajahi Bahasa
+            </Link>
+            <Link to="/chat" className="hover:text-primary">
+              Chat
+            </Link>
+            <Link to="/voice" className="hover:text-primary">
+              Voice
+            </Link>
+            <Link to="/studio" className="hover:text-primary">
+              Studio
+            </Link>
+          </div>
+          <div className="text-xs text-ink-mute text-center md:text-right">
+            © 2026 NusaLingua · PIDI DIGDAYA × Hackathon 2026
+            <br className="md:hidden" />
+            <span className="hidden md:inline"> · </span>
+            Mengangkat bahasa Nusantara ke era digital
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

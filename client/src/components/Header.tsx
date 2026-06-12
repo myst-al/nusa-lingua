@@ -15,8 +15,8 @@ export function Header({ showCta = true, rightSlot }: HeaderProps) {
   const initial = user?.email?.[0]?.toUpperCase() ?? "?";
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-line">
-      <div className="max-w-7xl mx-auto px-8 py-3.5 flex items-center justify-between">
+    <header className="sticky top-0 z-50 bg-white border-b border-line">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-3.5 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white font-extrabold">
             N

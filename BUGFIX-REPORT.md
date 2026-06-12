@@ -41,6 +41,22 @@
 | 18 | `client/src/pages/Chat.tsx` | Saat stream error, optimistic message temp (`tmp-*`) tertinggal di UI dan tidak sinkron dengan DB | `invalidateQueries(messages)` di onError untuk resync |
 | 19 | `client/src/App.tsx` | Seluruh app dalam 1 bundle 710kB (warning Vite) | Route-level code splitting (`React.lazy` + `Suspense`); halaman jadi chunk terpisah (Studio 23kB, Chat 13kB, Voice 10kB, Login 9kB, Explorer 6kB), Landing tetap eager |
 
+## Ronde 3 — UI/UX (13 Jun, diverifikasi visual via browser)
+
+| # | File | Masalah | Fix |
+|---|---|---|---|
+| 20 | `Voice.tsx` | Select bahasa nempel di samping orb (button orb bukan block element, ikut inline flow) | Tambah `block` — select kini di atas orb, layout kolom benar |
+| 21 | `Chat.tsx` | **Tidak ada tombol hapus percakapan** (API ada, UI tidak) | Tombol 🗑 per item sidebar (hover di desktop, selalu tampak di mobile) + konfirmasi + redirect kalau yang dihapus sedang dibuka |
+| 22 | `Chat.tsx` | Layout `grid-cols-[280px_1fr]` fixed — rusak di mobile | Sidebar jadi drawer mobile (hamburger ☰ + backdrop), desktop tetap 2 kolom |
+| 23 | `Studio.tsx` | Layout 3 kolom `260px_1fr_320px` fixed — rusak di mobile | Mobile: panel di-stack (canvas dulu, lalu palette & properties dengan max-height); desktop lg tetap 3 kolom |
+| 24 | `Landing.tsx` | Tidak ada footer — halaman berakhir mendadak | Footer: logo, nav (Explorer/Chat/Voice/Studio), copyright |
+| 25 | `Landing.tsx` | Timestamp stats "diperbarui 00.11.10" (detik ikut, mirip nomor versi) | Format jam:menit saja |
+| 26 | `Header.tsx` | Header semi-transparan — teks hero tembus saat scroll; padding mobile terlalu lebar | `bg-white` solid + `px-4 md:px-8` |
+| 27 | `Explorer.tsx` | Search box `min-w-[320px]` overflow di mobile; grid 2 kolom sempit di ponsel kecil | `w-full sm:min-w-[320px]`; grid `1 → sm:2 → md:3 → lg:4` |
+| 28 | `Login.tsx` | Padding `p-12` terlalu besar di mobile | `p-8 md:p-12` + gap antar blok brand panel |
+
+Verifikasi ronde 3: tsc 0 error, vite build sukses, halaman Landing/Voice/Chat/Explorer/Studio dicek visual di browser (desktop); perilaku mobile via breakpoint Tailwind standar.
+
 ## Catatan (tidak diubah, sadar-desain)
 
 - `DELETE /conversations/:id` dan `/bots/:id` balas 204 walau id tidak ada — idempotent, dapat diterima.
