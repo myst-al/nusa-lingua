@@ -1,15 +1,28 @@
+import { Suspense, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
 import { RequireAuth } from "./components/RequireAuth";
+// Landing tetap eager — first paint halaman utama tanpa request tambahan.
 import Landing from "./pages/Landing";
-import Login from "./pages/Login";
-import Chat from "./pages/Chat";
-import Voice from "./pages/Voice";
-import Explorer from "./pages/Explorer";
-import Studio from "./pages/Studio";
+
+// Route lain di-lazy-load (code splitting) supaya bundle awal kecil.
+const Login = lazy(() => import("./pages/Login"));
+const Chat = lazy(() => import("./pages/Chat"));
+const Voice = lazy(() => import("./pages/Voice"));
+const Explorer = lazy(() => import("./pages/Explorer"));
+const Studio = lazy(() => import("./pages/Studio"));
+
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center text-ink-mute text-sm">
+      Memuat…
+    </div>
+  );
+}
 
 export default function App() {
   return (
-    <Routes>
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
       {/* Public */}
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
@@ -56,6 +69,7 @@ export default function App() {
           </RequireAuth>
         }
       />
-    </Routes>
+      </Routes>
+    </Suspense>
   );
 }

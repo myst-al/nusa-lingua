@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { nanoid } from "nanoid";
-import { eq, asc, and } from "drizzle-orm";
+import { eq, desc, and, or } from "drizzle-orm";
 import { db, conversations, messages, languages, bots } from "../db/index.js";
 import { aiClient as openai, CHAT_MODEL } from "../services/ai.js";
 import { requireAuth } from "../middleware/auth.js";
@@ -62,10 +62,19 @@ messagesRouter.post(
       let maxTokens: number | undefined;
 
       if (convo.botId) {
+        // Hanya bot milik sendiri ATAU bot publik yang published yang boleh dipakai
         const [bot] = await db
           .select()
           .from(bots)
-          .where(eq(bots.id, convo.botId))
+          .where(
+            and(
+              eq(bots.id, convo.botId),
+              or(
+                eq(bots.userId, req.user!.id),
+                and(eq(bots.isPublic, true), eq(bots.status, "published"))
+              )
+            )
+          )
           .limit(1);
         if (bot?.flow) {
           const flow = bot.flow as BotFlow;
@@ -84,12 +93,16 @@ messagesRouter.post(
         content: body.content,
       });
 
-      // 5. Load history (max 20 terakhir, sederhanakan untuk MVP)
-      const history = await db
+      // 5. Load history — DIBATASI 20 pesan terakhir agar context & biaya token
+      //    tidak membengkak di percakapan panjang.
+      const HISTORY_LIMIT = 20;
+      const recent = await db
         .select()
         .from(messages)
         .where(eq(messages.conversationId, conversationId))
-        .orderBy(asc(messages.createdAt));
+        .orderBy(desc(messages.createdAt))
+        .limit(HISTORY_LIMIT);
+      const history = recent.reverse(); // kembalikan ke urutan kronologis
 
       const messagesForAPI = [
         { role: "system" as const, content: systemPrompt },
@@ -115,15 +128,29 @@ messagesRouter.post(
       let fullContent = "";
       let tokensUsed = 0;
 
+      // Abort upstream LLM stream kalau client disconnect (tutup tab, dll)
+      // supaya token tidak terus terpakai sia-sia.
+      const abortController = new AbortController();
+      let clientGone = false;
+      res.on("close", () => {
+        if (!res.writableEnded) {
+          clientGone = true;
+          abortController.abort();
+        }
+      });
+
       try {
-        const stream = await openai.chat.completions.create({
-          model,
-          messages: messagesForAPI,
-          temperature,
-          max_tokens: maxTokens,
-          stream: true,
-          stream_options: { include_usage: true },
-        });
+        const stream = await openai.chat.completions.create(
+          {
+            model,
+            messages: messagesForAPI,
+            temperature,
+            max_tokens: maxTokens,
+            stream: true,
+            stream_options: { include_usage: true },
+          },
+          { signal: abortController.signal }
+        );
 
         for await (const chunk of stream) {
           const delta = chunk.choices[0]?.delta?.content;
@@ -153,6 +180,22 @@ messagesRouter.post(
         sendEvent("done", { messageId: assistantMsgId, tokensUsed });
         res.end();
       } catch (apiErr) {
+        // Client disconnect: simpan partial response (kalau ada) lalu selesai diam-diam.
+        if (clientGone) {
+          if (fullContent) {
+            await db
+              .insert(messages)
+              .values({
+                id: nanoid(),
+                conversationId,
+                role: "assistant",
+                content: fullContent,
+                tokensUsed,
+              })
+              .catch(() => undefined);
+          }
+          return;
+        }
         console.error("OpenAI error:", apiErr);
         sendEvent("error", {
           error: apiErr instanceof Error ? apiErr.message : "OpenAI request failed",

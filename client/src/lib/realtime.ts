@@ -20,6 +20,8 @@ export interface RealtimeEvents {
   onDisconnected?: () => void;
   onUserTranscript?: (text: string) => void;
   onAssistantTranscript?: (text: string, isFinal: boolean) => void;
+  /** true saat AI mulai bicara (audio keluar), false saat selesai. */
+  onSpeakingChange?: (speaking: boolean) => void;
   onError?: (err: string) => void;
 }
 
@@ -75,8 +77,10 @@ export class RealtimeSession {
     const offer = await this.pc.createOffer();
     await this.pc.setLocalDescription(offer);
 
-    // 7. Send offer ke OpenAI realtime endpoint
-    const model = "gpt-4o-realtime-preview-2024-12-17";
+    // 7. Send offer ke OpenAI realtime endpoint.
+    // Model diambil dari session response server (ikut env OPENAI_REALTIME_MODEL),
+    // jangan hardcode supaya client & server tidak mismatch.
+    const model = session.model ?? "gpt-4o-realtime-preview-2024-12-17";
     const sdpResponse = await fetch(
       `https://api.openai.com/v1/realtime?model=${model}`,
       {
@@ -118,6 +122,17 @@ export class RealtimeSession {
         case "response.audio_transcript.done":
           this.events.onAssistantTranscript?.(this.currentAssistantText, true);
           this.currentAssistantText = "";
+          break;
+
+        // Status bicara AI — event WebRTC output_audio_buffer.* paling akurat;
+        // response.done sebagai fallback penutup.
+        case "output_audio_buffer.started":
+          this.events.onSpeakingChange?.(true);
+          break;
+        case "output_audio_buffer.stopped":
+        case "output_audio_buffer.cleared":
+        case "response.done":
+          this.events.onSpeakingChange?.(false);
           break;
 
         case "error":

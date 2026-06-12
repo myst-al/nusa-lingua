@@ -83,6 +83,7 @@ export const api = {
   createVoiceSession: (languageCode: string, voice?: string) =>
     jsonFetch<{
       id: string;
+      model?: string;
       client_secret: { value: string; expires_at: number };
     }>("/voice/session", {
       method: "POST",

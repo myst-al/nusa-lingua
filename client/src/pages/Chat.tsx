@@ -102,6 +102,9 @@ export default function Chat() {
         alert(`Error: ${err}`);
         setIsStreaming(false);
         setStreamingText("");
+        // Sinkronkan ulang dengan server — buang optimistic message temp
+        // (pesan user mungkin sudah/belum tersimpan tergantung titik gagal).
+        qc.invalidateQueries({ queryKey: ["messages", conversationId] });
       },
     });
   }
@@ -172,7 +175,11 @@ export default function Chat() {
             </div>
             <select
               className="w-full px-3 py-2 border border-line rounded-lg text-sm bg-white"
-              onChange={(e) => handleNewConversation(e.target.value)}
+              onChange={(e) => {
+                if (e.target.value) handleNewConversation(e.target.value);
+                // Reset ke placeholder supaya bahasa yang sama bisa dipilih lagi
+                e.target.value = "";
+              }}
               defaultValue=""
             >
               <option value="" disabled>

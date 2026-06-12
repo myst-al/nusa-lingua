@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Header } from "../components/Header";
 import { api } from "../lib/api";
+import { useAuth } from "../lib/auth";
 import { formatNumber } from "../lib/utils";
 
 export default function Explorer() {
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { user } = useAuth();
   const [search, setSearch] = useState("");
 
   const { data: languages = [], isLoading } = useQuery({
@@ -22,7 +24,23 @@ export default function Explorer() {
       qc.invalidateQueries({ queryKey: ["conversations"] });
       navigate(`/chat/${convo.id}`);
     },
+    onError: (err) => {
+      // Halaman ini publik — kalau belum login, arahkan ke login
+      if (err instanceof Error && err.message.includes("401")) {
+        navigate("/login", { state: { from: { pathname: "/explorer" } } });
+      } else {
+        alert("Gagal membuat percakapan. Coba lagi.");
+      }
+    },
   });
+
+  function handleStart(code: string) {
+    if (!user) {
+      navigate("/login", { state: { from: { pathname: "/explorer" } } });
+      return;
+    }
+    startMutation.mutate(code);
+  }
 
   const filtered = languages.filter(
     (l) =>
@@ -71,7 +89,7 @@ export default function Explorer() {
               <button
                 key={lang.code}
                 disabled={lang.status === "soon" || startMutation.isPending}
-                onClick={() => startMutation.mutate(lang.code)}
+                onClick={() => handleStart(lang.code)}
                 className={`text-left card p-5 transition-all ${
                   lang.status === "soon"
                     ? "opacity-60 cursor-not-allowed"

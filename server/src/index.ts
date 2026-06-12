@@ -12,6 +12,10 @@ import { errorHandler } from "./middleware/error.js";
 
 const app = express();
 
+// Di belakang nginx reverse proxy: percayai X-Forwarded-* (1 hop)
+// agar req.ip / req.protocol benar (penting untuk logging & rate limiting).
+app.set("trust proxy", 1);
+
 // ============================================
 // MIDDLEWARE
 // ============================================
@@ -47,8 +51,12 @@ app.use((_req, res) => {
 
 app.use(errorHandler);
 
-app.listen(env.PORT, () => {
-  console.log(`\n🚀 NusaLingua server siap di http://localhost:${env.PORT}`);
+// Production: bind hanya ke loopback — akses publik wajib lewat nginx.
+// Development: bind semua interface agar mudah diakses (mis. dari device lain).
+const HOST = env.NODE_ENV === "production" ? "127.0.0.1" : "0.0.0.0";
+
+app.listen(env.PORT, HOST, () => {
+  console.log(`\n🚀 NusaLingua server siap di http://${HOST}:${env.PORT}`);
   console.log(`   Environment: ${env.NODE_ENV}`);
   console.log(`   CORS origin: ${env.CLIENT_ORIGIN}`);
   console.log(`   Chat model:  ${env.OPENAI_CHAT_MODEL}`);

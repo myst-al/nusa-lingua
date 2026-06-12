@@ -9,7 +9,10 @@ export const voiceRouter = Router();
 
 const sessionSchema = z.object({
   languageCode: z.string().min(2).max(16).default("id"),
-  voice: z.enum(["alloy", "echo", "fable", "onyx", "nova", "shimmer"]).default("alloy"),
+  // Hanya voice yang didukung OpenAI Realtime API (fable/onyx/nova = TTS-only, ditolak Realtime)
+  voice: z
+    .enum(["alloy", "ash", "ballad", "coral", "echo", "sage", "shimmer", "verse"])
+    .default("alloy"),
 });
 
 /**

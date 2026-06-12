@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { z } from "zod";
 import { nanoid } from "nanoid";
-import { db, conversations, messages, languages } from "../db/index.js";
-import { eq, desc, and } from "drizzle-orm";
+import { db, conversations, messages, languages, bots } from "../db/index.js";
+import { eq, desc, and, or } from "drizzle-orm";
 import { requireAuth } from "../middleware/auth.js";
 
 export const conversationsRouter = Router();
@@ -46,6 +46,26 @@ conversationsRouter.post("/conversations", requireAuth, async (req, res, next) =
       .limit(1);
     if (!lang) {
       return res.status(400).json({ error: "Bahasa tidak ditemukan" });
+    }
+
+    // Validate botId (kalau ada): hanya bot milik sendiri atau bot publik published
+    if (body.botId) {
+      const [bot] = await db
+        .select({ id: bots.id })
+        .from(bots)
+        .where(
+          and(
+            eq(bots.id, body.botId),
+            or(
+              eq(bots.userId, req.user!.id),
+              and(eq(bots.isPublic, true), eq(bots.status, "published"))
+            )
+          )
+        )
+        .limit(1);
+      if (!bot) {
+        return res.status(400).json({ error: "Bot tidak ditemukan atau tidak dapat diakses" });
+      }
     }
 
     const id = nanoid();

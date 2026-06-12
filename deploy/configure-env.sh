@@ -113,6 +113,18 @@ OPENAI_REALTIME_MODEL=${OPENAI_REALTIME_MODEL:-gpt-4o-realtime-preview-2024-12-1
 
 [[ "$OPENAI_API_KEY" =~ ^sk- ]] || warn "OpenAI key biasanya mulai 'sk-', cek lagi"
 
+# Groq (opsional) — chat gratis & cepat; voice tetap via OpenAI
+echo ""
+info "Opsional: Groq API key (chat gratis via Llama 3.3 70B; kosongkan untuk pakai OpenAI)"
+read -p "  Groq API Key (gsk_... / kosongkan): " GROQ_API_KEY
+AI_PROVIDER="openai"
+GROQ_CHAT_MODEL="llama-3.3-70b-versatile"
+if [ -n "$GROQ_API_KEY" ]; then
+    AI_PROVIDER="groq"
+    read -p "  Groq chat model [llama-3.3-70b-versatile]: " GROQ_MODEL_IN
+    GROQ_CHAT_MODEL=${GROQ_MODEL_IN:-llama-3.3-70b-versatile}
+fi
+
 # ============================================================
 # SECTION 3: Domain + Server Config
 # ============================================================
@@ -157,7 +169,12 @@ NODE_ENV=production
 PORT=$PORT
 CLIENT_ORIGIN=$CLIENT_ORIGIN
 
-# OpenAI
+# AI provider (chat): groq (gratis) atau openai
+AI_PROVIDER=$AI_PROVIDER
+GROQ_API_KEY=$GROQ_API_KEY
+GROQ_CHAT_MODEL=$GROQ_CHAT_MODEL
+
+# OpenAI (wajib untuk voice/Realtime API)
 OPENAI_API_KEY=$OPENAI_API_KEY
 OPENAI_CHAT_MODEL=$OPENAI_CHAT_MODEL
 OPENAI_REALTIME_MODEL=$OPENAI_REALTIME_MODEL

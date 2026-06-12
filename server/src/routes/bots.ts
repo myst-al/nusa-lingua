@@ -35,7 +35,8 @@ const botFlowSchema = z.object({
 
 const createBotSchema = z.object({
   name: z.string().min(1).max(120),
-  description: z.string().max(2000).optional(),
+  // nullish: client boleh kirim null (mis. mengosongkan deskripsi saat update)
+  description: z.string().max(2000).nullish(),
   languageCode: z.string().min(2).max(16),
   flow: botFlowSchema,
   status: z.enum(["draft", "published", "archived"]).optional(),
@@ -123,6 +124,19 @@ botsRouter.get("/bots/:id", requireAuth, async (req, res, next) => {
 botsRouter.patch("/bots/:id", requireAuth, async (req, res, next) => {
   try {
     const body = updateBotSchema.parse(req.body);
+
+    // Validate languageCode kalau diubah — hindari FK error 500
+    if (body.languageCode) {
+      const [lang] = await db
+        .select({ code: languages.code })
+        .from(languages)
+        .where(eq(languages.code, body.languageCode))
+        .limit(1);
+      if (!lang) {
+        return res.status(400).json({ error: "Bahasa tidak ditemukan" });
+      }
+    }
+
     const [updated] = await db
       .update(bots)
       .set({

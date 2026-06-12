@@ -66,6 +66,16 @@ export default function Voice() {
             setPartialAssistant(text);
           }
         },
+        onSpeakingChange: (speaking) => {
+          // Jangan override idle/error (mis. event telat masuk setelah sesi berakhir)
+          setStatus((prev) =>
+            prev === "idle" || prev === "error" || prev === "connecting"
+              ? prev
+              : speaking
+                ? "speaking"
+                : "listening"
+          );
+        },
         onError: (err) => {
           setError(err);
           setStatus("error");

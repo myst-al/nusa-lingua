@@ -96,6 +96,20 @@ export default function Studio() {
     if (currentBot) setDraft(currentBot);
   }, [currentBot]);
 
+  // Reset form saat pindah ke "+ Bot Baru" (/studio tanpa botId) — tanpa ini,
+  // draft bot lama terbawa dan tersimpan sebagai bot duplikat.
+  useEffect(() => {
+    if (!botId) {
+      setDraft({
+        name: "Chatbot Baru",
+        languageCode: "su",
+        flow: DEFAULT_FLOW,
+        status: "draft",
+      });
+      setSelectedId(null);
+    }
+  }, [botId]);
+
   // ============================================
   // MUTATIONS
   // ============================================
@@ -513,7 +527,10 @@ function NodeProperties({
               min="0"
               max="2"
               value={node.temperature}
-              onChange={(e) => onChange({ temperature: Number(e.target.value) })}
+              onChange={(e) => {
+                const v = Number(e.target.value);
+                if (Number.isFinite(v)) onChange({ temperature: v });
+              }}
               className="input-field"
             />
           </Field>
@@ -601,15 +618,23 @@ function BotProperties({
           min="0"
           max="2"
           value={flow.temperature ?? 0.7}
-          onChange={(e) => onFlowChange({ temperature: Number(e.target.value) })}
+          onChange={(e) => {
+            const v = Number(e.target.value);
+            // Field kosong → undefined (pakai default server), bukan NaN
+            onFlowChange({ temperature: Number.isFinite(v) ? Math.min(2, Math.max(0, v)) : undefined });
+          }}
           className="input-field"
         />
       </Field>
       <Field label="Max Tokens">
         <input
           type="number"
+          min="1"
           value={flow.maxTokens ?? 400}
-          onChange={(e) => onFlowChange({ maxTokens: Number(e.target.value) })}
+          onChange={(e) => {
+            const v = Number(e.target.value);
+            onFlowChange({ maxTokens: Number.isFinite(v) && v > 0 ? Math.floor(v) : undefined });
+          }}
           className="input-field"
         />
       </Field>

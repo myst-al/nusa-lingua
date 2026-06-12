@@ -105,20 +105,29 @@ export async function requireAuth(
     return res.status(401).json({ error: "Invalid token" });
   }
 
-  // Upsert user (first-time login akan dibuat record-nya)
-  await db
-    .insert(users)
-    .values({
-      id: verified.id,
-      email: verified.email,
-      name: verified.name ?? "User",
-      avatarUrl: verified.avatarUrl ?? null,
-    })
-    .onConflictDoNothing();
+  // Upsert user (first-time login akan dibuat record-nya).
+  // Di-cache in-memory supaya tidak menulis ke DB di SETIAP request.
+  if (!seenUsers.has(verified.id)) {
+    await db
+      .insert(users)
+      .values({
+        id: verified.id,
+        email: verified.email,
+        name: verified.name ?? "User",
+        avatarUrl: verified.avatarUrl ?? null,
+      })
+      .onConflictDoNothing();
+    if (seenUsers.size >= SEEN_USERS_MAX) seenUsers.clear();
+    seenUsers.add(verified.id);
+  }
 
   req.user = { id: verified.id, email: verified.email };
   next();
 }
+
+// Cache user-id yang sudah pernah di-upsert (reset saat restart / penuh).
+const SEEN_USERS_MAX = 10_000;
+const seenUsers = new Set<string>();
 
 /**
  * Optional auth — kalau ada Authorization header, di-verify; kalau tidak,

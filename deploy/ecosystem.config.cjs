@@ -13,8 +13,8 @@ module.exports = {
       watch: false,
       max_memory_restart: "500M",   // restart kalau RAM > 500MB
 
-      // Env file path
-      env_file: ".env",
+      // CATATAN: PM2 tidak punya opsi env_file — .env di-load oleh
+      // aplikasi sendiri (dotenv di server/src/env.ts, relatif ke cwd).
 
       // Override NODE_ENV
       env: {
