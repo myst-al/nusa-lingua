@@ -176,17 +176,9 @@ export default function Login() {
             type="button"
             onClick={() => handleOAuth("google")}
             disabled={busy}
-            className="w-full px-3.5 py-2.5 border border-line rounded-xl text-sm font-semibold flex items-center justify-center gap-2 mb-2 hover:border-primary"
-          >
-            🔵 Lanjut dengan Google
-          </button>
-          <button
-            type="button"
-            onClick={() => handleOAuth("github")}
-            disabled={busy}
             className="w-full px-3.5 py-2.5 border border-line rounded-xl text-sm font-semibold flex items-center justify-center gap-2 hover:border-primary"
           >
-            🐙 Lanjut dengan GitHub
+            🔵 Lanjut dengan Google
           </button>
 
           <p className="text-center text-xs text-ink-mute mt-6">

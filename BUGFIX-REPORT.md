@@ -57,6 +57,12 @@
 
 Verifikasi ronde 3: tsc 0 error, vite build sukses, halaman Landing/Voice/Chat/Explorer/Studio dicek visual di browser (desktop); perilaku mobile via breakpoint Tailwind standar.
 
+## Ronde 4 — Database Security (13 Jun, via Supabase MCP)
+
+| # | Lokasi | Masalah | Fix |
+|---|---|---|---|
+| 29 | Supabase (semua 6 tabel public) | **RLS disabled** — siapa pun dengan anon key (ter-bundle di client) bisa baca/tulis seluruh tabel users/conversations/messages/bots langsung via PostgREST, melewati server Express | Migration `enable_rls_all_tables`: RLS ON di 6 tabel tanpa policy → akses REST anon/authenticated diblokir total. Server tidak terdampak (koneksi langsung Postgres + service_role bypass RLS). **Diverifikasi**: `/api/languages` tetap jalan; `GET /rest/v1/users` dengan anon key kini balas `[]` |
+
 ## Catatan (tidak diubah, sadar-desain)
 
 - `DELETE /conversations/:id` dan `/bots/:id` balas 204 walau id tidak ada — idempotent, dapat diterima.
