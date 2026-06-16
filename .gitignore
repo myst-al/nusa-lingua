@@ -37,3 +37,6 @@ coverage/
 # Misc
 .cache/
 .parcel-cache/
+
+# Standarisasi npm (pnpm-lock memicu install campur npm/pnpm)
+pnpm-lock.yaml

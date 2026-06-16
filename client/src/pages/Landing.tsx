@@ -33,9 +33,6 @@ export default function Landing() {
 
       {/* HERO */}
       <section className="max-w-7xl mx-auto px-8 py-20 text-center">
-        <span className="inline-block px-3.5 py-1.5 rounded-full bg-primary-50 text-primary-700 border border-primary-200 text-xs font-bold tracking-wide mb-6">
-          PIDI DIGDAYA × HACKATHON 2026
-        </span>
         <h1 className="text-5xl md:text-6xl font-extrabold leading-tight tracking-tight mb-5">
           Suara Indonesia
           <br />
@@ -168,7 +165,7 @@ export default function Landing() {
             </Link>
           </div>
           <div className="text-xs text-ink-mute text-center md:text-right">
-            © 2026 NusaLingua · PIDI DIGDAYA × Hackathon 2026
+            © 2026 NusaLingua
             <br className="md:hidden" />
             <span className="hidden md:inline"> · </span>
             Mengangkat bahasa Nusantara ke era digital
