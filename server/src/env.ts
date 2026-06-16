@@ -34,7 +34,7 @@ const envSchema = z.object({
   // OpenAI — wajib untuk voice (Realtime API).
   OPENAI_API_KEY: z.string().min(10, "OPENAI_API_KEY required (untuk voice)"),
   OPENAI_CHAT_MODEL: z.string().default("gpt-4o-mini"),
-  OPENAI_REALTIME_MODEL: z.string().default("gpt-4o-realtime-preview-2024-12-17"),
+  OPENAI_REALTIME_MODEL: z.string().default("gpt-realtime"),
 
   // Supabase
   SUPABASE_URL: z.string().url(),
