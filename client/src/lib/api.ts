@@ -99,6 +99,13 @@ export const api = {
         body: JSON.stringify({ text, targetCode, sourceCode }),
       }
     ),
+
+  // VOICE REPLY (auth) - one-shot untuk Mode Hemat (Web Speech)
+  voiceReply: (text: string, languageCode: string) =>
+    jsonFetch<{ reply: string }>("/voice/reply", {
+      method: "POST",
+      body: JSON.stringify({ text, languageCode }),
+    }),
 };
 
 /**
