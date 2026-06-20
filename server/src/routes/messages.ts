@@ -11,6 +11,7 @@ export const messagesRouter = Router();
 
 const sendMessageSchema = z.object({
   content: z.string().min(1).max(4000),
+  register: z.enum(["halus", "santai"]).optional(),
 });
 
 /**
@@ -82,6 +83,15 @@ messagesRouter.post(
           if (flow.temperature !== undefined) temperature = flow.temperature;
           if (flow.maxTokens) maxTokens = flow.maxTokens;
         }
+      }
+
+      // 3b. Tingkat tutur (Fase 2) -> sisipkan ke system prompt
+      if (body.register === "halus") {
+        systemPrompt +=
+          "\n\nTingkat tutur: gunakan ragam yang HALUS dan SOPAN (mis. krama alus untuk Jawa, basa lemes untuk Sunda, alus untuk Bali). Konsisten sepanjang percakapan.";
+      } else if (body.register === "santai") {
+        systemPrompt +=
+          "\n\nTingkat tutur: gunakan ragam SEHARI-HARI yang akrab/santai (mis. ngoko untuk Jawa, loma untuk Sunda).";
       }
 
       // 4. Insert user message

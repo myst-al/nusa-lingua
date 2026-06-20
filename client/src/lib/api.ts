@@ -101,7 +101,8 @@ export async function streamChat(
     onDelta: (text: string) => void;
     onDone: (messageId: string) => void;
     onError: (err: string) => void;
-  }
+  },
+  register?: string
 ): Promise<void> {
   const token = await getAccessToken();
   const headers: Record<string, string> = {
@@ -112,7 +113,7 @@ export async function streamChat(
   const res = await fetch(`${BASE}/conversations/${conversationId}/messages`, {
     method: "POST",
     headers,
-    body: JSON.stringify({ content }),
+    body: JSON.stringify({ content, register }),
   });
 
   if (!res.ok || !res.body) {
