@@ -24,14 +24,21 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(3001),
   DATABASE_URL: z.string().min(10),
 
-  // AI provider selector
-  AI_PROVIDER: z.enum(["groq", "openai"]).optional(),
+  // Pemilih provider AI untuk chat
+  AI_PROVIDER: z.enum(["sealion", "groq", "openai"]).optional(),
 
-  // Groq (free tier) — opsional. Kalau set, jadi default provider.
+  // SEA-LION / Sahabat-AI - model AI kawasan (Indonesia/ASEAN), OpenAI-compatible.
+  // Jadi provider default kalau SEA_LION_API_KEY di-set.
+  // Key gratis: https://playground.sea-lion.ai (API Key Manager).
+  SEA_LION_API_KEY: z.string().optional(),
+  SEA_LION_BASE_URL: z.string().default("https://api.sea-lion.ai/v1"),
+  SEA_LION_CHAT_MODEL: z.string().default("aisingapore/Llama-SEA-LION-v3-70B-IT"),
+
+  // Groq (gratis, cepat) - fallback chat.
   GROQ_API_KEY: z.string().optional(),
   GROQ_CHAT_MODEL: z.string().default("llama-3.3-70b-versatile"),
 
-  // OpenAI — wajib untuk voice (Realtime API).
+  // OpenAI - wajib untuk Voice (Realtime API); bisa juga jadi provider chat.
   OPENAI_API_KEY: z.string().min(10, "OPENAI_API_KEY required (untuk voice)"),
   OPENAI_CHAT_MODEL: z.string().default("gpt-4o-mini"),
   OPENAI_REALTIME_MODEL: z.string().default("gpt-realtime"),
@@ -49,7 +56,7 @@ const envSchema = z.object({
 const parsed = envSchema.safeParse(process.env);
 
 if (!parsed.success) {
-  console.error("❌ Invalid environment variables:");
+  console.error("Invalid environment variables:");
   console.error(parsed.error.flatten().fieldErrors);
   console.error("");
   console.error("Cari .env di:");
