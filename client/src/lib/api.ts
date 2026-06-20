@@ -89,6 +89,16 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ languageCode, voice }),
     }),
+
+  // TRANSLATE (auth)
+  translate: (text: string, targetCode: string, sourceCode?: string) =>
+    jsonFetch<{ translation: string; sourceName: string; targetName: string }>(
+      "/translate",
+      {
+        method: "POST",
+        body: JSON.stringify({ text, targetCode, sourceCode }),
+      }
+    ),
 };
 
 /**

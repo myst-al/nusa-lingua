@@ -8,6 +8,8 @@ import { messagesRouter } from "./routes/messages.js";
 import { voiceRouter } from "./routes/voice.js";
 import { botsRouter } from "./routes/bots.js";
 import { statsRouter } from "./routes/stats.js";
+import { translateRouter } from "./routes/translate.js";
+import { CHAT_MODEL, ACTIVE_PROVIDER } from "./services/ai.js";
 import { errorHandler } from "./middleware/error.js";
 
 const app = express();
@@ -44,6 +46,7 @@ app.use("/api", messagesRouter);
 app.use("/api", voiceRouter);
 app.use("/api", botsRouter);
 app.use("/api", statsRouter);
+app.use("/api", translateRouter);
 
 app.use((_req, res) => {
   res.status(404).json({ error: "Not found" });
@@ -59,7 +62,7 @@ app.listen(env.PORT, HOST, () => {
   console.log(`\n🚀 NusaLingua server siap di http://${HOST}:${env.PORT}`);
   console.log(`   Environment: ${env.NODE_ENV}`);
   console.log(`   CORS origin: ${env.CLIENT_ORIGIN}`);
-  console.log(`   Chat model:  ${env.OPENAI_CHAT_MODEL}`);
+  console.log(`   Chat AI:     ${ACTIVE_PROVIDER} (${CHAT_MODEL})`);
   console.log(`   Voice model: ${env.OPENAI_REALTIME_MODEL}`);
   console.log(`   Supabase:    ${env.SUPABASE_URL}\n`);
 });
