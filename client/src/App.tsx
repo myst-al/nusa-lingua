@@ -10,6 +10,7 @@ const Chat = lazy(() => import("./pages/Chat"));
 const Voice = lazy(() => import("./pages/Voice"));
 const Explorer = lazy(() => import("./pages/Explorer"));
 const Studio = lazy(() => import("./pages/Studio"));
+const Translate = lazy(() => import("./pages/Translate"));
 
 function PageLoader() {
   return (
@@ -66,6 +67,14 @@ export default function App() {
         element={
           <RequireAuth>
             <Studio />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/translate"
+        element={
+          <RequireAuth>
+            <Translate />
           </RequireAuth>
         }
       />

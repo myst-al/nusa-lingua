@@ -41,7 +41,7 @@ export class RealtimeSession {
   async start(languageCode: string, voice = "alloy"): Promise<void> {
     // 1. Get ephemeral token dari server
     const session = await api.createVoiceSession(languageCode, voice);
-    const ephemeralKey = session.client_secret.value;
+    const ephemeralKey = session.value;
 
     // 2. Create peer connection
     this.pc = new RTCPeerConnection();
@@ -80,9 +80,9 @@ export class RealtimeSession {
     // 7. Send offer ke OpenAI realtime endpoint.
     // Model diambil dari session response server (ikut env OPENAI_REALTIME_MODEL),
     // jangan hardcode supaya client & server tidak mismatch.
-    const model = session.model ?? "gpt-4o-realtime-preview-2024-12-17";
+    const model = session.model ?? "gpt-realtime";
     const sdpResponse = await fetch(
-      `https://api.openai.com/v1/realtime?model=${model}`,
+      `https://api.openai.com/v1/realtime/calls?model=${model}`,
       {
         method: "POST",
         body: offer.sdp,

@@ -21,7 +21,7 @@ jobs:
     # Hanya jalan kalau CI sebelumnya pass (manual gating bisa pakai environments)
     environment: production
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -49,7 +49,7 @@ jobs:
       # Deploy via SSH (rsync + restart PM2)
       # ============================================================
       - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.9.0
+        uses: webfactory/ssh-agent@v0.10.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 

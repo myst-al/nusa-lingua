@@ -76,6 +76,15 @@ export function Header({ showCta = true, rightSlot }: HeaderProps) {
                   <button
                     onClick={() => {
                       setMenuOpen(false);
+                      navigate("/translate");
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-stone-50"
+                  >
+                    🔤 Terjemah
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
                       navigate("/studio");
                     }}
                     className="w-full text-left px-4 py-2.5 text-sm hover:bg-stone-50"

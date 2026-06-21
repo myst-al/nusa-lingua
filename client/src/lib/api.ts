@@ -82,12 +82,29 @@ export const api = {
   // VOICE (auth)
   createVoiceSession: (languageCode: string, voice?: string) =>
     jsonFetch<{
-      id: string;
-      model?: string;
-      client_secret: { value: string; expires_at: number };
+      value: string;
+      model: string;
+      expires_at?: number;
     }>("/voice/session", {
       method: "POST",
       body: JSON.stringify({ languageCode, voice }),
+    }),
+
+  // TRANSLATE (auth)
+  translate: (text: string, targetCode: string, sourceCode?: string) =>
+    jsonFetch<{ translation: string; sourceName: string; targetName: string }>(
+      "/translate",
+      {
+        method: "POST",
+        body: JSON.stringify({ text, targetCode, sourceCode }),
+      }
+    ),
+
+  // VOICE REPLY (auth) - one-shot untuk Mode Hemat (Web Speech)
+  voiceReply: (text: string, languageCode: string) =>
+    jsonFetch<{ reply: string }>("/voice/reply", {
+      method: "POST",
+      body: JSON.stringify({ text, languageCode }),
     }),
 };
 
@@ -101,7 +118,8 @@ export async function streamChat(
     onDelta: (text: string) => void;
     onDone: (messageId: string) => void;
     onError: (err: string) => void;
-  }
+  },
+  register?: string
 ): Promise<void> {
   const token = await getAccessToken();
   const headers: Record<string, string> = {
@@ -112,7 +130,7 @@ export async function streamChat(
   const res = await fetch(`${BASE}/conversations/${conversationId}/messages`, {
     method: "POST",
     headers,
-    body: JSON.stringify({ content }),
+    body: JSON.stringify({ content, register }),
   });
 
   if (!res.ok || !res.body) {
