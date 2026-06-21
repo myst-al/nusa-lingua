@@ -114,10 +114,17 @@ export const api = {
       email: string;
       name: string;
       plan: "pro_trial" | "free";
-      trialEndsAt: string;
+      trialStartedAt: string | null;
+      trialEndsAt: string | null;
       trialActive: boolean;
       trialDaysLeft: number;
+      trialUsed: boolean;
     }>("/me"),
+  startTrial: () =>
+    jsonFetch<{ trialActive: boolean; trialDaysLeft: number; trialUsed: boolean }>(
+      "/trial/start",
+      { method: "POST" }
+    ),
 };
 
 /**

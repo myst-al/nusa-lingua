@@ -68,7 +68,11 @@ export function Header({ showCta = true, rightSlot }: HeaderProps) {
                   : "Tingkatkan ke Pro"
               }
             >
-              {me.trialActive ? `✨ Pro · ${me.trialDaysLeft} hari` : "Upgrade ke Pro"}
+              {me.trialActive
+                ? `✨ Pro · ${me.trialDaysLeft} hari`
+                : me.trialUsed
+                  ? "Upgrade ke Pro"
+                  : "Coba Pro Gratis"}
             </button>
           )}
 

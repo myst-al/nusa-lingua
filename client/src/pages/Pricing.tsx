@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Header } from "../components/Header";
+import { useAuth } from "../lib/auth";
+import { api } from "../lib/api";
 
 interface Tier {
   name: string;
@@ -79,7 +82,107 @@ function rupiah(n: number): string {
 
 export default function Pricing() {
   const navigate = useNavigate();
+  const qc = useQueryClient();
+  const { user } = useAuth();
   const [annual, setAnnual] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  const { data: me } = useQuery({
+    queryKey: ["me"],
+    queryFn: () => api.getMe(),
+    enabled: !!user,
+  });
+
+  async function startTrial() {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    setStarting(true);
+    setMsg(null);
+    try {
+      await api.startTrial();
+      await qc.invalidateQueries({ queryKey: ["me"] });
+      setMsg("🎉 Uji coba Pro 14 hari kamu aktif! Nikmati semua fitur.");
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "Gagal mengaktifkan uji coba.");
+    } finally {
+      setStarting(false);
+    }
+  }
+
+  function renderCta(t: Tier) {
+    // Enterprise
+    if (t.monthly === null) {
+      return (
+        <button
+          onClick={() =>
+            (window.location.href =
+              "mailto:halo@nusalingua.my.id?subject=NusaLingua%20Enterprise")
+          }
+          className="w-full mb-5 btn-ghost border border-line"
+        >
+          {t.cta}
+        </button>
+      );
+    }
+    // Gratis
+    if (!t.highlight) {
+      return (
+        <button
+          onClick={() => navigate(user ? "/chat" : "/login")}
+          className="w-full mb-5 btn-ghost border border-line"
+        >
+          {user ? "Buka NusaLingua" : t.cta}
+        </button>
+      );
+    }
+    // Pro — alur uji coba opt-in
+    if (!user) {
+      return (
+        <button onClick={() => navigate("/login")} className="w-full mb-5 btn-primary">
+          Coba 14 Hari Gratis
+        </button>
+      );
+    }
+    if (!me) {
+      return (
+        <button disabled className="w-full mb-5 btn-primary opacity-60">
+          Memuat…
+        </button>
+      );
+    }
+    if (me.trialActive) {
+      return (
+        <div className="w-full mb-5 text-center rounded-xl bg-green-50 text-green-700 font-semibold py-2.5 border border-green-200 text-sm">
+          ✨ Uji coba aktif · {me.trialDaysLeft} hari lagi
+        </div>
+      );
+    }
+    if (me.trialUsed) {
+      return (
+        <button
+          onClick={() =>
+            (window.location.href =
+              "mailto:halo@nusalingua.my.id?subject=Langganan%20NusaLingua%20Pro")
+          }
+          className="w-full mb-5 btn-primary"
+        >
+          Langganan Pro
+        </button>
+      );
+    }
+    return (
+      <button
+        onClick={startTrial}
+        disabled={starting}
+        className="w-full mb-5 btn-primary disabled:opacity-60"
+      >
+        {starting ? "Mengaktifkan…" : "Mulai Uji Coba 14 Hari"}
+      </button>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -96,7 +199,6 @@ export default function Pricing() {
             saat butuh lebih — atau bangun di atas API NusaLingua untuk pasar ASEAN.
           </p>
 
-          {/* Toggle billing */}
           <div className="inline-flex items-center gap-1 mt-7 p-1 bg-stone-100 rounded-full border border-line">
             <button
               onClick={() => setAnnual(false)}
@@ -117,6 +219,14 @@ export default function Pricing() {
             </button>
           </div>
         </section>
+
+        {msg && (
+          <div className="max-w-6xl mx-auto px-4 md:px-8">
+            <div className="rounded-xl border border-green-200 bg-green-50 text-green-800 text-sm px-4 py-3 mb-2 text-center">
+              {msg}
+            </div>
+          </div>
+        )}
 
         {/* CONSUMER TIERS */}
         <section className="max-w-6xl mx-auto px-4 md:px-8 pb-12 grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -155,16 +265,7 @@ export default function Pricing() {
                 )}
               </div>
 
-              <button
-                onClick={() =>
-                  t.monthly === null
-                    ? (window.location.href = "mailto:halo@nusalingua.my.id?subject=NusaLingua%20Enterprise")
-                    : navigate("/login")
-                }
-                className={`w-full mb-5 ${t.highlight ? "btn-primary" : "btn-ghost border border-line"}`}
-              >
-                {t.cta}
-              </button>
+              {renderCta(t)}
 
               <ul className="space-y-2.5 text-sm">
                 {t.features.map((f) => (
@@ -229,11 +330,11 @@ export default function Pricing() {
         <section className="max-w-3xl mx-auto px-4 md:px-8 py-14 text-center">
           <h2 className="text-2xl font-extrabold mb-3">Siap mulai?</h2>
           <p className="text-ink-soft text-sm mb-6">
-            Daftar gratis hari ini — tanpa kartu kredit.
+            Daftar gratis hari ini — lalu aktifkan uji coba Pro 14 hari kapan pun kamu mau.
           </p>
           <div className="flex gap-3 justify-center">
-            <button className="btn-primary btn-lg" onClick={() => navigate("/login")}>
-              Daftar Gratis
+            <button className="btn-primary btn-lg" onClick={() => navigate(user ? "/chat" : "/login")}>
+              {user ? "Buka NusaLingua" : "Daftar Gratis"}
             </button>
             <button className="btn-ghost btn-lg border border-line" onClick={() => navigate("/explorer")}>
               Jelajahi Bahasa
