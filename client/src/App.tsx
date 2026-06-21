@@ -11,6 +11,7 @@ const Voice = lazy(() => import("./pages/Voice"));
 const Explorer = lazy(() => import("./pages/Explorer"));
 const Studio = lazy(() => import("./pages/Studio"));
 const Translate = lazy(() => import("./pages/Translate"));
+const Pricing = lazy(() => import("./pages/Pricing"));
 
 function PageLoader() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/explorer" element={<Explorer />} />
+      <Route path="/pricing" element={<Pricing />} />
 
       {/* Protected */}
       <Route

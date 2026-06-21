@@ -33,6 +33,9 @@ export function Header({ showCta = true, rightSlot }: HeaderProps) {
               <button className="btn-ghost btn-sm" onClick={() => navigate("/explorer")}>
                 Bahasa
               </button>
+              <button className="btn-ghost btn-sm" onClick={() => navigate("/pricing")}>
+                Harga
+              </button>
               <button className="btn-ghost btn-sm" onClick={() => navigate("/login")}>
                 Masuk
               </button>
@@ -90,6 +93,15 @@ export function Header({ showCta = true, rightSlot }: HeaderProps) {
                     className="w-full text-left px-4 py-2.5 text-sm hover:bg-stone-50"
                   >
                     ▦ Studio
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      navigate("/pricing");
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-stone-50"
+                  >
+                    💎 Langganan
                   </button>
                   <button
                     onClick={async () => {
