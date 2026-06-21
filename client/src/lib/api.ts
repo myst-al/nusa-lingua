@@ -106,6 +106,18 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ text, languageCode }),
     }),
+
+  // ME / TRIAL (auth)
+  getMe: () =>
+    jsonFetch<{
+      id: string;
+      email: string;
+      name: string;
+      plan: "pro_trial" | "free";
+      trialEndsAt: string;
+      trialActive: boolean;
+      trialDaysLeft: number;
+    }>("/me"),
 };
 
 /**

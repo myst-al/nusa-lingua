@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../lib/auth";
+import { api } from "../lib/api";
 
 interface HeaderProps {
   showCta?: boolean;
@@ -11,6 +13,13 @@ export function Header({ showCta = true, rightSlot }: HeaderProps) {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const { data: me } = useQuery({
+    queryKey: ["me"],
+    queryFn: () => api.getMe(),
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
 
   const initial = user?.email?.[0]?.toUpperCase() ?? "?";
 
@@ -44,6 +53,25 @@ export function Header({ showCta = true, rightSlot }: HeaderProps) {
               </button>
             </>
           )}
+
+          {user && me && (
+            <button
+              onClick={() => navigate("/pricing")}
+              className={
+                me.trialActive
+                  ? "hidden sm:inline-flex items-center px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-xs font-semibold"
+                  : "hidden sm:inline-flex btn-primary btn-sm"
+              }
+              title={
+                me.trialActive
+                  ? `Uji coba Pro berakhir dalam ${me.trialDaysLeft} hari`
+                  : "Tingkatkan ke Pro"
+              }
+            >
+              {me.trialActive ? `✨ Pro · ${me.trialDaysLeft} hari` : "Upgrade ke Pro"}
+            </button>
+          )}
+
           {user && (
             <div className="relative">
               <button
@@ -58,6 +86,17 @@ export function Header({ showCta = true, rightSlot }: HeaderProps) {
                     <div className="text-xs text-ink-mute">Login sebagai</div>
                     <div className="text-sm font-semibold truncate">{user.email}</div>
                   </div>
+                  {me && (
+                    <div className="px-4 py-2 border-b border-line text-xs">
+                      {me.trialActive ? (
+                        <span className="text-amber-700 font-semibold">
+                          ✨ Pro (uji coba) · {me.trialDaysLeft} hari lagi
+                        </span>
+                      ) : (
+                        <span className="text-ink-mute">Paket: Gratis</span>
+                      )}
+                    </div>
+                  )}
                   <button
                     onClick={() => {
                       setMenuOpen(false);

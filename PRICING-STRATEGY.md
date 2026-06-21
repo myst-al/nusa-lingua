@@ -35,6 +35,8 @@ Tiga prinsip yang menyetir harga NusaLingua:
 | API | — | 100rb token/bln | Volume + diskon |
 | Lain | Dukungan komunitas | Riwayat, ekspor, prioritas email | SSO, on-prem/VPC, SLA, dedicated |
 
+**Uji coba:** setiap pendaftar baru otomatis mendapat **Pro gratis 14 hari** (tanpa kartu kredit) untuk mendorong konversi Gratis -> Pro.
+
 **Rasional harga Pro Rp49.000:** terjangkau untuk pasar massal Indonesia (setara ~2 gelas kopi), cukup menutup biaya + margin sehat karena COGS teks ~0. Kuota voice 60 mnt/bln membatasi paparan biaya termahal.
 
 ## 4. API developer (bayar sesuai pakai)

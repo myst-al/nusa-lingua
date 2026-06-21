@@ -34,9 +34,10 @@ const TIERS: Tier[] = [
     tagline: "Untuk individu & UMKM",
     monthly: 49000,
     annualPerMonth: 40800,
-    cta: "Langganan Pro",
+    cta: "Coba 14 Hari Gratis",
     highlight: true,
     features: [
+      "14 hari uji coba gratis (tanpa kartu kredit)",
       "Chat & Terjemahan tanpa batas wajar",
       "Semua 100+ bahasa Nusantara",
       "Voice realtime 60 menit/bln",

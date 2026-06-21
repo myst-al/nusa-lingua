@@ -9,6 +9,7 @@ import { voiceRouter } from "./routes/voice.js";
 import { botsRouter } from "./routes/bots.js";
 import { statsRouter } from "./routes/stats.js";
 import { translateRouter } from "./routes/translate.js";
+import { meRouter } from "./routes/me.js";
 import { CHAT_MODEL, ACTIVE_PROVIDER } from "./services/ai.js";
 import { errorHandler } from "./middleware/error.js";
 
@@ -47,6 +48,7 @@ app.use("/api", voiceRouter);
 app.use("/api", botsRouter);
 app.use("/api", statsRouter);
 app.use("/api", translateRouter);
+app.use("/api", meRouter);
 
 app.use((_req, res) => {
   res.status(404).json({ error: "Not found" });
