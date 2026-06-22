@@ -138,7 +138,8 @@ export async function streamChat(
     onDone: (messageId: string) => void;
     onError: (err: string) => void;
   },
-  register?: string
+  register?: string,
+  signal?: AbortSignal
 ): Promise<void> {
   const token = await getAccessToken();
   const headers: Record<string, string> = {
@@ -150,6 +151,7 @@ export async function streamChat(
     method: "POST",
     headers,
     body: JSON.stringify({ content, register }),
+    signal,
   });
 
   if (!res.ok || !res.body) {

@@ -114,6 +114,16 @@ messagesRouter.post(
         .limit(HISTORY_LIMIT);
       const history = recent.reverse(); // kembalikan ke urutan kronologis
 
+      // 4b. Auto-title dari pesan pertama (kalau judul masih default "Percakapan ...")
+      if (recent.length === 1 && convo.title.startsWith("Percakapan ")) {
+        const raw = body.content.trim().replace(/\s+/g, " ");
+        const title = raw.length > 48 ? `${raw.slice(0, 48)}…` : raw;
+        await db
+          .update(conversations)
+          .set({ title })
+          .where(eq(conversations.id, conversationId));
+      }
+
       const messagesForAPI = [
         { role: "system" as const, content: systemPrompt },
         ...history.map((m) => ({

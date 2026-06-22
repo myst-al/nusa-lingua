@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Header } from "../components/Header";
@@ -31,6 +31,7 @@ export default function Chat() {
   const [sidebarOpen, setSidebarOpen] = useState(false); // drawer mobile
   const [showNewChat, setShowNewChat] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const { data: conversations = [] } = useQuery({
     queryKey: ["conversations"],
@@ -99,6 +100,10 @@ export default function Chat() {
     }
   }
 
+  function handleStop() {
+    abortRef.current?.abort();
+  }
+
   async function handleSend() {
     if (!input.trim() || !conversationId || isStreaming) return;
     const content = input.trim();
@@ -125,31 +130,38 @@ export default function Chat() {
       },
     ]);
 
+    const ctrl = new AbortController();
+    abortRef.current = ctrl;
     let assistantText = "";
-    await streamChat(
-      conversationId,
-      content,
-      {
-        onDelta: (text) => {
-          assistantText += text;
-          setStreamingText(assistantText);
+    try {
+      await streamChat(
+        conversationId,
+        content,
+        {
+          onDelta: (text) => {
+            assistantText += text;
+            setStreamingText(assistantText);
+          },
+          onDone: () => {
+            qc.invalidateQueries({ queryKey: ["conversations"] });
+          },
+          onError: (err) => {
+            if (ctrl.signal.aborted) return;
+            console.error(err);
+            alert(`Error: ${err}`);
+          },
         },
-        onDone: () => {
-          setStreamingText("");
-          setIsStreaming(false);
-          qc.invalidateQueries({ queryKey: ["messages", conversationId] });
-          qc.invalidateQueries({ queryKey: ["conversations"] });
-        },
-        onError: (err) => {
-          console.error(err);
-          alert(`Error: ${err}`);
-          setIsStreaming(false);
-          setStreamingText("");
-          qc.invalidateQueries({ queryKey: ["messages", conversationId] });
-        },
-      },
-      register || undefined
-    );
+        register || undefined,
+        ctrl.signal
+      );
+    } catch (err) {
+      if ((err as Error)?.name !== "AbortError") console.error(err);
+    } finally {
+      abortRef.current = null;
+      setIsStreaming(false);
+      setStreamingText("");
+      qc.invalidateQueries({ queryKey: ["messages", conversationId] });
+    }
   }
 
   const currentLanguage = languages.find((l) => l.code === currentConvo?.languageCode);
@@ -299,13 +311,23 @@ export default function Chat() {
                   >
                     🎤
                   </button>
-                  <button
-                    onClick={handleSend}
-                    disabled={!input.trim() || isStreaming}
-                    className="w-9 h-9 rounded-xl bg-primary hover:bg-primary-700 disabled:opacity-40 text-white flex items-center justify-center font-bold"
-                  >
-                    →
-                  </button>
+                  {isStreaming ? (
+                    <button
+                      onClick={handleStop}
+                      className="w-9 h-9 rounded-xl bg-red-600 hover:bg-red-700 text-white flex items-center justify-center"
+                      title="Hentikan"
+                    >
+                      ■
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleSend}
+                      disabled={!input.trim()}
+                      className="w-9 h-9 rounded-xl bg-primary hover:bg-primary-700 disabled:opacity-40 text-white flex items-center justify-center font-bold"
+                    >
+                      →
+                    </button>
+                  )}
                 </div>
                 <div className="text-center text-[11px] text-ink-mute mt-2">
                   NusaLingua menggunakan AI. Respons mungkin tidak selalu akurat.
@@ -479,6 +501,122 @@ function NewChatModal({
   );
 }
 
+// Markdown ringan tanpa dependency (aman, tanpa dangerouslySetInnerHTML).
+function mdInline(text: string): ReactNode[] {
+  const nodes: ReactNode[] = [];
+  const re = /(\*\*[^*]+\*\*|\*[^*\n]+\*|`[^`]+`|\[[^\]]+\]\([^)]+\))/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let k = 0;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) nodes.push(text.slice(last, m.index));
+    const tok = m[0];
+    if (tok.startsWith("**")) {
+      nodes.push(<strong key={k++}>{tok.slice(2, -2)}</strong>);
+    } else if (tok.startsWith("`")) {
+      nodes.push(
+        <code key={k++} className="px-1 py-0.5 rounded bg-stone-100 text-[0.85em] font-mono">
+          {tok.slice(1, -1)}
+        </code>
+      );
+    } else if (tok.startsWith("[")) {
+      const mm = /\[([^\]]+)\]\(([^)]+)\)/.exec(tok);
+      if (mm) {
+        nodes.push(
+          <a key={k++} href={mm[2]} target="_blank" rel="noreferrer" className="text-primary underline">
+            {mm[1]}
+          </a>
+        );
+      } else nodes.push(tok);
+    } else {
+      nodes.push(<em key={k++}>{tok.slice(1, -1)}</em>);
+    }
+    last = m.index + tok.length;
+  }
+  if (last < text.length) nodes.push(text.slice(last));
+  return nodes;
+}
+
+function MarkdownLite({ text }: { text: string }) {
+  const lines = text.split("\n");
+  const blocks: ReactNode[] = [];
+  let i = 0;
+  let k = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    if (line.trim().startsWith("```")) {
+      const buf: string[] = [];
+      i++;
+      while (i < lines.length && !lines[i].trim().startsWith("```")) {
+        buf.push(lines[i]);
+        i++;
+      }
+      i++;
+      blocks.push(
+        <pre key={k++} className="bg-stone-900 text-stone-100 rounded-lg p-3 overflow-x-auto text-xs my-2">
+          <code>{buf.join("\n")}</code>
+        </pre>
+      );
+      continue;
+    }
+    const h = /^(#{1,3})\s+(.*)$/.exec(line);
+    if (h) {
+      const lvl = h[1].length;
+      const cls =
+        lvl === 1 ? "text-lg font-extrabold" : lvl === 2 ? "text-base font-bold" : "text-sm font-bold";
+      blocks.push(
+        <div key={k++} className={`${cls} mt-2 mb-1`}>
+          {mdInline(h[2])}
+        </div>
+      );
+      i++;
+      continue;
+    }
+    if (/^\s*([-*]|\d+\.)\s+/.test(line)) {
+      const ordered = /^\s*\d+\.\s+/.test(line);
+      const items: ReactNode[] = [];
+      while (i < lines.length && /^\s*([-*]|\d+\.)\s+/.test(lines[i])) {
+        const item = lines[i].replace(/^\s*([-*]|\d+\.)\s+/, "");
+        items.push(<li key={items.length}>{mdInline(item)}</li>);
+        i++;
+      }
+      blocks.push(
+        ordered ? (
+          <ol key={k++} className="list-decimal ml-5 my-1 space-y-0.5">
+            {items}
+          </ol>
+        ) : (
+          <ul key={k++} className="list-disc ml-5 my-1 space-y-0.5">
+            {items}
+          </ul>
+        )
+      );
+      continue;
+    }
+    if (line.trim() === "") {
+      i++;
+      continue;
+    }
+    const para: string[] = [];
+    while (
+      i < lines.length &&
+      lines[i].trim() !== "" &&
+      !lines[i].trim().startsWith("```") &&
+      !/^(#{1,3})\s+/.test(lines[i]) &&
+      !/^\s*([-*]|\d+\.)\s+/.test(lines[i])
+    ) {
+      para.push(lines[i]);
+      i++;
+    }
+    blocks.push(
+      <p key={k++} className="my-1 leading-relaxed whitespace-pre-line">
+        {mdInline(para.join("\n"))}
+      </p>
+    );
+  }
+  return <div>{blocks}</div>;
+}
+
 function Bubble({
   role,
   content,
@@ -489,8 +627,18 @@ function Bubble({
   streaming?: boolean;
 }) {
   const isUser = role === "user";
+  const [copied, setCopied] = useState(false);
+  function copy() {
+    navigator.clipboard
+      ?.writeText(content)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      })
+      .catch(() => undefined);
+  }
   return (
-    <div className={`flex gap-3 max-w-3xl ${isUser ? "ml-auto flex-row-reverse" : ""}`}>
+    <div className={`group flex gap-3 max-w-3xl ${isUser ? "ml-auto flex-row-reverse" : ""}`}>
       <div
         className={`w-8 h-8 rounded-xl flex items-center justify-center font-extrabold text-xs flex-shrink-0 ${
           isUser ? "bg-stone-900 text-white" : "bg-primary text-white"
@@ -498,15 +646,25 @@ function Bubble({
       >
         {isUser ? "A" : "N"}
       </div>
-      <div
-        className={`px-4 py-3 max-w-xl whitespace-pre-wrap text-sm leading-relaxed ${
-          isUser
-            ? "bg-primary text-white rounded-2xl rounded-tr-md"
-            : "bg-white border border-line rounded-2xl rounded-tl-md"
-        }`}
-      >
-        {content}
-        {streaming && <span className="inline-block w-1.5 h-4 bg-primary ml-1 animate-pulse" />}
+      <div className="min-w-0">
+        <div
+          className={`px-4 py-3 max-w-xl text-sm leading-relaxed break-words ${
+            isUser
+              ? "bg-primary text-white rounded-2xl rounded-tr-md whitespace-pre-wrap"
+              : "bg-white border border-line rounded-2xl rounded-tl-md"
+          }`}
+        >
+          {isUser ? content : <MarkdownLite text={content} />}
+          {streaming && <span className="inline-block w-1.5 h-4 bg-primary ml-1 animate-pulse" />}
+        </div>
+        {!streaming && content && !isUser && (
+          <button
+            onClick={copy}
+            className="mt-1 text-[10px] text-ink-mute hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            {copied ? "✓ Disalin" : "Salin"}
+          </button>
+        )}
       </div>
     </div>
   );
