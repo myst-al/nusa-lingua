@@ -128,7 +128,7 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ci-mock-service-key-test
           OPENAI_API_KEY: sk-ci-mock-test-key
           DATABASE_URL: postgres://ci@localhost/ci
-          CLIENT_ORIGIN: http://localhost:5173
+          CLIENT_ORIGIN: http://localhost:6101
         run: npx tsx src/__tests__/test-business-process.ts
 
   # ============================================================
@@ -212,13 +212,13 @@ jobs:
 
       - name: Serve client dist
         run: |
-          npx --yes serve client/dist -l 5173 &
+          npx --yes serve client/dist -l 6101 &
           sleep 3
-          curl -fsS http://localhost:5173 > /dev/null || (echo "Server not up" && exit 1)
+          curl -fsS http://localhost:6101 > /dev/null || (echo "Server not up" && exit 1)
 
       - name: Run Playwright smoke
         env:
-          E2E_BASE_URL: http://localhost:5173
+          E2E_BASE_URL: http://localhost:6101
           CI: "true"
         run: npx playwright test --project=chromium --reporter=list
         continue-on-error: true

@@ -12,7 +12,7 @@
 | 4 | `server/src/routes/bots.ts` | `description: null` ditolak Zod (`.optional()` ≠ nullable) | Tombol **"Simpan Perubahan"** di Studio selalu gagal 400 untuk bot tanpa deskripsi | Schema jadi `.nullish()`; PATCH juga validasi `languageCode` → 400 (bukan FK error 500) |
 | 5 | `server/src/routes/voice.ts` | Enum voice berisi `fable/onyx/nova` — hanya valid untuk TTS API, **ditolak Realtime API** | Pilihan voice tertentu → error 400 dari OpenAI | Enum diganti ke voice yang didukung Realtime: `alloy, ash, ballad, coral, echo, sage, shimmer, verse` |
 | 6 | `client/src/lib/realtime.ts` | Model realtime **hardcoded** di client | Ganti `OPENAI_REALTIME_MODEL` di server → client tetap handshake ke model lama (mismatch) | Pakai `session.model` dari response server, hardcode tinggal fallback |
-| 7 | `server/src/index.ts` | Tidak ada `trust proxy`; listen di semua interface | Di belakang nginx `req.ip` = IP proxy; port 3001 berpotensi diakses langsung dari internet | `app.set("trust proxy", 1)`; production bind `127.0.0.1` |
+| 7 | `server/src/index.ts` | Tidak ada `trust proxy`; listen di semua interface | Di belakang nginx `req.ip` = IP proxy; port 6100 berpotensi diakses langsung dari internet | `app.set("trust proxy", 1)`; production bind `127.0.0.1` |
 | 8 | `deploy/nginx.conf` | `proxy_set_header Connection "upgrade"` hardcoded | Keepalive ke upstream mati untuk semua request biasa → koneksi TCP baru per request | Tambah `map $http_upgrade $connection_upgrade`, header pakai variabel |
 
 ## Sedang

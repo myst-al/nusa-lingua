@@ -199,7 +199,7 @@ SUPABASE_ANON_KEY=test-anon \
 SUPABASE_SERVICE_ROLE_KEY=test-svc \
 OPENAI_API_KEY=sk-test \
 DATABASE_URL=postgres://test \
-CLIENT_ORIGIN=http://localhost:5173 \
+CLIENT_ORIGIN=http://localhost:6101 \
 npm --prefix server run test
 
 # 4. E2E (Playwright)

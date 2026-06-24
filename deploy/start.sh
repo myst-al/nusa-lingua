@@ -40,7 +40,7 @@ pm2 status
 echo ""
 log "Test health endpoint..."
 sleep 2
-HTTP=$(curl -s -o /tmp/health_resp -w "%{http_code}" http://localhost:3001/api/health || echo "000")
+HTTP=$(curl -s -o /tmp/health_resp -w "%{http_code}" http://localhost:6100/api/health || echo "000")
 if [ "$HTTP" = "200" ]; then
     log "✅ Health check OK"
     cat /tmp/health_resp; echo

@@ -142,8 +142,8 @@ CLIENT_ORIGIN="https://${DOMAIN}"
 read -p "  Override CLIENT_ORIGIN? [$CLIENT_ORIGIN]: " override
 [ -n "$override" ] && CLIENT_ORIGIN="$override"
 
-read -p "  Server PORT [3001]: " PORT
-PORT=${PORT:-3001}
+read -p "  Server PORT [6100]: " PORT
+PORT=${PORT:-6100}
 
 # ============================================================
 # SECTION 4: Generate auto secrets + write .env

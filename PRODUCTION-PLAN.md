@@ -1,6 +1,6 @@
 # NusaLingua — Production Deployment Plan (Nginx)
 
-> Target: VPS Ubuntu 22.04 + domain sudah ada. Arsitektur: **nginx (TLS, static, rate-limit) → Express :3001 (PM2) → Supabase + OpenAI/Groq**.
+> Target: VPS Ubuntu 22.04 + domain sudah ada. Arsitektur: **nginx (TLS, static, rate-limit) → Express :6100 (PM2) → Supabase + OpenAI/Groq**.
 > Estimasi total: ~60 menit. Tanggal: 2026-06-12.
 
 ---
@@ -10,7 +10,7 @@
 ```
 Internet ── HTTPS :443 ──► nginx
                             ├─ /            → /var/www/nusalingua (React build, cache 1y)
-                            └─ /api/*       → proxy 127.0.0.1:3001 (Express via PM2)
+                            └─ /api/*       → proxy 127.0.0.1:6100 (Express via PM2)
                                               ├─ SSE streaming chat (proxy_buffering off)
                                               ├─ Supabase Postgres (Drizzle, pool max 10)
                                               ├─ Supabase Auth (JWT verify)
@@ -52,7 +52,7 @@ chmod +x deploy/*.sh
 ./deploy/setup-server.sh    # Node 20, nginx, certbot, PM2, ufw, fail2ban, swap
 ```
 
-Catatan: script ini reset UFW → allow hanya SSH + Nginx Full (80/443). Port 3001 TIDAK dibuka — memang by design.
+Catatan: script ini reset UFW → allow hanya SSH + Nginx Full (80/443). Port 6100 TIDAK dibuka — memang by design.
 
 ## Fase 3 — Environment (5 menit)
 
@@ -97,7 +97,7 @@ Verifikasi:
 ```bash
 pm2 status                              # online
 curl https://DOMAIN/api/health          # {"status":"ok",...}
-ss -tlnp | grep 3001                    # bind 127.0.0.1:3001 (bukan 0.0.0.0)
+ss -tlnp | grep 6100                    # bind 127.0.0.1:6100 (bukan 0.0.0.0)
 ```
 
 ## Fase 7 — Smoke test production (10 menit)
@@ -111,7 +111,7 @@ ss -tlnp | grep 3001                    # bind 127.0.0.1:3001 (bukan 0.0.0.0)
 | 5 | Studio: buat bot → Simpan → edit → Simpan Perubahan | Tidak ada error 400 (bug description sudah difix) |
 | 6 | Explorer tanpa login → klik bahasa | Redirect ke /login (bukan gagal diam-diam) |
 | 7 | Kirim pesan lalu tutup tab di tengah streaming | `pm2 logs` tidak menunjukkan stream lanjut berjalan lama |
-| 8 | `curl -s -o /dev/null -w "%{http_code}" http://VPS_IP:3001/api/health` dari luar | Timeout/refused (port tertutup) |
+| 8 | `curl -s -o /dev/null -w "%{http_code}" http://VPS_IP:6100/api/health` dari luar | Timeout/refused (port tertutup) |
 
 ## Fase 8 — Operasional
 

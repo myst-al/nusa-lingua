@@ -227,7 +227,7 @@ Node server tidak jalan / port salah.
 ```bash
 pm2 status         # cek status
 pm2 logs nusalingua-server --lines 50
-curl http://localhost:3001/api/health   # langsung hit backend
+curl http://localhost:6100/api/health   # langsung hit backend
 ```
 
 ### ❌ Database connection refused

@@ -21,7 +21,7 @@ for (const p of candidates) {
 
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-  PORT: z.coerce.number().default(3001),
+  PORT: z.coerce.number().default(6100),
   DATABASE_URL: z.string().min(10),
 
   // Pemilih provider AI untuk chat
@@ -50,7 +50,7 @@ const envSchema = z.object({
   SUPABASE_JWT_SECRET: z.string().min(10).optional(),
 
   // CORS
-  CLIENT_ORIGIN: z.string().default("http://localhost:5173"),
+  CLIENT_ORIGIN: z.string().default("http://localhost:6101"),
 });
 
 const parsed = envSchema.safeParse(process.env);

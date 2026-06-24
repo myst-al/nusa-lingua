@@ -14,8 +14,8 @@ Stack:
 
 ```
 nusalingua-mvp/
-├── client/              # React + Vite frontend (port 5173)
-├── server/              # Express + TS backend (port 3001)
+├── client/              # React + Vite frontend (port 6101)
+├── server/              # Express + TS backend (port 6100)
 ├── shared/              # Shared TypeScript types
 └── .env.example
 ```
@@ -70,9 +70,9 @@ npm --prefix server run db:seed
 npm run dev
 ```
 
-- Client: http://localhost:5173
-- Server: http://localhost:3001
-- Health check: http://localhost:3001/api/health
+- Client: http://localhost:6101
+- Server: http://localhost:6100
+- Health check: http://localhost:6100/api/health
 
 ## Fitur MVP
 

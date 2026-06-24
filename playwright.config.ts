@@ -22,7 +22,7 @@ export default defineConfig({
     ["junit", { outputFile: "playwright-report/junit.xml" }],
   ],
   use: {
-    baseURL: process.env.E2E_BASE_URL ?? "http://localhost:5173",
+    baseURL: process.env.E2E_BASE_URL ?? "http://localhost:6101",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
@@ -42,7 +42,7 @@ export default defineConfig({
     ? undefined
     : {
         command: "npm --prefix client run dev",
-        port: 5173,
+        port: 6101,
         reuseExistingServer: true,
         timeout: 60_000,
       },

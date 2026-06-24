@@ -159,12 +159,12 @@ jobs:
 
       - name: Serve dist
         run: |
-          npx --yes serve client/dist -l 5173 &
+          npx --yes serve client/dist -l 6101 &
           sleep 3
 
       - name: Run Playwright all browsers
         env:
-          E2E_BASE_URL: http://localhost:5173
+          E2E_BASE_URL: http://localhost:6101
           CI: "true"
         run: npx playwright test --reporter=list,html
         continue-on-error: true
@@ -209,7 +209,7 @@ jobs:
 
       - name: Serve dist
         run: |
-          npx --yes serve client/dist -l 5173 &
+          npx --yes serve client/dist -l 6101 &
           sleep 3
 
       - name: Run axe-core sweep
@@ -219,7 +219,7 @@ jobs:
           import AxeBuilder from '@axe-core/playwright';
           for (const path of ['/', '/explorer', '/login']) {
             test(`a11y: ${path}`, async ({ page }) => {
-              await page.goto(`http://localhost:5173${path}`);
+              await page.goto(`http://localhost:6101${path}`);
               const results = await new AxeBuilder({ page }).analyze();
               const criticals = results.violations.filter((v) => v.impact === 'critical');
               expect(criticals).toEqual([]);

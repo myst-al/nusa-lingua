@@ -48,7 +48,7 @@ Tidak ada — sprint pertama. Bug fixing pra-sprint selesai 12 Jun.
 ## Definition of Done
 
 - [ ] Semua P0 selesai; `https://DOMAIN` & `/api/health` hijau
-- [ ] 8 skenario smoke test lulus (chat streaming, voice, studio save/edit, auth, port 3001 tertutup)
+- [ ] 8 skenario smoke test lulus (chat streaming, voice, studio save/edit, auth, port 6100 tertutup)
 - [ ] Typecheck + build + test hijau di CI
 - [ ] PM2 auto-start on reboot terverifikasi (`pm2 save` + reboot test)
 - [ ] Monitoring uptime aktif + OpenAI usage limit terpasang

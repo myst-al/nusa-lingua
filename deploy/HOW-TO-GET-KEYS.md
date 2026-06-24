@@ -176,7 +176,7 @@ curl "https://abcdefg.supabase.co/rest/v1/" \
    - **Name**: `NusaLingua Web`
    - **Authorized JavaScript origins**: tambah:
      - `https://nusalingua.id` (atau domain prod kamu)
-     - `http://localhost:5173` (untuk dev)
+     - `http://localhost:6101` (untuk dev)
    - **Authorized redirect URIs**: tambah **callback URL dari Supabase** (PENTING!):
      ```
      https://abcdefg.supabase.co/auth/v1/callback
