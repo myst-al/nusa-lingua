@@ -12,6 +12,7 @@ const Explorer = lazy(() => import("./pages/Explorer"));
 const Studio = lazy(() => import("./pages/Studio"));
 const Translate = lazy(() => import("./pages/Translate"));
 const Pricing = lazy(() => import("./pages/Pricing"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 function PageLoader() {
   return (
@@ -80,6 +81,8 @@ export default function App() {
           </RequireAuth>
         }
       />
+      {/* Catch-all 404 */}
+      <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
   );
