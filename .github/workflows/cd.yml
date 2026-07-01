@@ -21,7 +21,7 @@ jobs:
     # Hanya jalan kalau CI sebelumnya pass (manual gating bisa pakai environments)
     environment: production
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Node
         uses: actions/setup-node@v4
