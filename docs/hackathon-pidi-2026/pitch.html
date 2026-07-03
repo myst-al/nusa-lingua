@@ -1,0 +1,379 @@
+<title>NusaLingua — Pitch PIDI DIGDAYA 2026</title>
+<style>
+  :root{
+    --nila-900:#141A3D; --nila-800:#1B2350; --nila-700:#232C63; --nila-500:#3A468F;
+    --soga:#E86A17; --soga-400:#F59E42; --soga-glow:rgba(232,106,23,.16);
+    --kertas:#F5F1E8; --kapur:#FFFFFF; --kapur-2:#FBF8F1;
+    --ink:#1C2130; --ink-soft:#4C5162; --ink-mute:#7A7E8C;
+    --garis:#E6DFD0; --garis-strong:#D6CDBA;
+    --live:#2E9E5B; --live-bg:#E4F3E9; --beta:#C4881A; --beta-bg:#FBF0DA; --soon:#8A8676; --soon-bg:#ECE8DE;
+    --maxw:1080px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--kertas); color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6; -webkit-font-smoothing:antialiased;
+    font-feature-settings:"kern";
+  }
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px}
+  .serif{font-family:Georgia,"Times New Roman",serif}
+  .num{font-variant-numeric:tabular-nums}
+  h1,h2,h3{text-wrap:balance; line-height:1.12; letter-spacing:-.02em}
+  .eyebrow{
+    font-size:12px; font-weight:700; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--soga);
+  }
+  a{color:inherit}
+  section{padding:64px 0; border-top:1px solid var(--garis)}
+  .lead{font-size:clamp(15px,1.6vw,17px); color:var(--ink-soft); max-width:60ch}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative; overflow:hidden;
+    background:radial-gradient(120% 140% at 82% -10%, var(--nila-700) 0%, var(--nila-900) 60%);
+    color:#EDEBF6; padding:0; border-top:none;
+  }
+  #weave{position:absolute; inset:0; width:100%; height:100%; z-index:0; opacity:.5}
+  .hero .wrap{position:relative; z-index:1; padding-top:72px; padding-bottom:76px}
+  .badge-row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:30px}
+  .badge{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:12px; font-weight:600; letter-spacing:.03em;
+    padding:7px 13px; border-radius:100px;
+    background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.16); color:#DCD9EC;
+    backdrop-filter:blur(4px);
+  }
+  .badge .dot{width:7px;height:7px;border-radius:50%;background:var(--soga);box-shadow:0 0 10px var(--soga)}
+  .wordmark{display:flex; align-items:center; gap:13px; margin-bottom:26px}
+  .glyph{
+    width:46px;height:46px;border-radius:13px;flex:none;
+    background:linear-gradient(150deg,var(--soga),#C8500A);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:23px;color:#fff;box-shadow:0 8px 26px var(--soga-glow)
+  }
+  .wordmark b{font-size:23px;font-weight:800;letter-spacing:-.01em}
+  .wordmark b i{font-style:normal;color:var(--soga-400)}
+  .hero h1{
+    font-size:clamp(34px,5.4vw,60px); font-weight:800; color:#fff;
+    max-width:16ch; margin-bottom:20px;
+  }
+  .hero h1 .hl{color:var(--soga-400)}
+  .hero p.k{font-size:clamp(16px,1.9vw,19px); color:#C7C3DC; max-width:56ch; margin-bottom:14px}
+  .hero .quote{
+    font-size:clamp(17px,2vw,21px); color:#F1EAD8; margin:26px 0 34px;
+    padding-left:18px; border-left:3px solid var(--soga); max-width:52ch;
+  }
+  .hero .quote span{color:#B7B2CD; font-size:15px; display:block; margin-top:6px}
+  .stat-row{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; max-width:760px}
+  .stat{background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:16px 16px}
+  .stat .v{font-size:clamp(20px,2.6vw,27px); font-weight:800; color:#fff; letter-spacing:-.02em}
+  .stat .v em{font-style:normal;color:var(--soga-400)}
+  .stat .l{font-size:12px; color:#ADA9C4; margin-top:3px; line-height:1.35}
+
+  /* ---------- section head ---------- */
+  .shead{margin-bottom:34px}
+  .shead h2{font-size:clamp(24px,3vw,33px); font-weight:800; margin:10px 0 8px}
+
+  /* ---------- problem / solution ---------- */
+  .duo{display:grid; grid-template-columns:1fr 1fr; gap:20px}
+  .panel{border-radius:16px; padding:26px; border:1px solid var(--garis); background:var(--kapur)}
+  .panel.problem{background:linear-gradient(180deg,#FFF 0%,#FBF7F1 100%)}
+  .panel h3{font-size:16px; font-weight:800; margin-bottom:4px; display:flex; align-items:center; gap:9px}
+  .panel .tag{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:6px}
+  .tag.red{background:#FBE9E4;color:#B5461E}
+  .tag.grn{background:var(--live-bg);color:var(--live)}
+  .panel ul{list-style:none; margin-top:16px; display:flex; flex-direction:column; gap:13px}
+  .panel li{display:flex; gap:11px; font-size:14.5px; color:var(--ink-soft)}
+  .panel li b{color:var(--ink); font-weight:650}
+  .mk{flex:none;width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;margin-top:1px}
+  .mk.red{background:#FBE9E4;color:#B5461E}
+  .mk.grn{background:var(--live-bg);color:var(--live)}
+
+  /* ---------- PIDI fit ---------- */
+  .fit{background:var(--nila-900); color:#E9E7F3; border-radius:20px; padding:34px; position:relative; overflow:hidden}
+  .fit .chain{display:flex; flex-wrap:wrap; gap:10px; align-items:stretch; margin-top:20px}
+  .node{flex:1; min-width:180px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.13); border-radius:13px; padding:16px 17px}
+  .node .n{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--soga-400);font-weight:700;margin-bottom:7px}
+  .node p{font-size:14px;color:#CFCBE1;line-height:1.45}
+  .node.hot{background:linear-gradient(160deg,rgba(232,106,23,.20),rgba(232,106,23,.05)); border-color:rgba(245,158,66,.4)}
+  .node.hot p{color:#F6EEDF}
+  .arrow{align-self:center;color:var(--soga-400);font-weight:800;font-size:20px}
+
+  /* ---------- status grid ---------- */
+  .status-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+  .scard{background:var(--kapur); border:1px solid var(--garis); border-radius:14px; padding:18px 18px 16px}
+  .scard .top{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px}
+  .scard h4{font-size:15px; font-weight:750}
+  .scard p{font-size:13px; color:var(--ink-mute); line-height:1.45}
+  .chip{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:4px 9px;border-radius:100px;white-space:nowrap}
+  .chip.live{background:var(--live-bg);color:var(--live)}
+  .chip.build{background:var(--beta-bg);color:var(--beta)}
+  .langbar{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+  .lang{font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;border:1px solid var(--garis)}
+  .lang.live{background:var(--live-bg);color:var(--live);border-color:transparent}
+  .lang.beta{background:var(--beta-bg);color:var(--beta);border-color:transparent}
+  .lang.soon{background:var(--soon-bg);color:var(--soon);border-color:transparent}
+
+  /* ---------- diff ---------- */
+  .diff{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .dcard{background:var(--kapur-2);border:1px solid var(--garis);border-radius:14px;padding:22px 18px}
+  .dcard .ic{width:38px;height:38px;border-radius:11px;background:var(--soga-glow);color:var(--soga);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;margin-bottom:14px}
+  .dcard h4{font-size:15px;font-weight:750;margin-bottom:6px}
+  .dcard p{font-size:13px;color:var(--ink-soft);line-height:1.5}
+
+  /* ---------- BMC ---------- */
+  .bmc-scroll{overflow-x:auto}
+  .bmc{display:grid; grid-template-columns:repeat(10,1fr); grid-auto-rows:minmax(96px,auto); gap:8px; min-width:860px}
+  .b{background:var(--kapur);border:1px solid var(--garis);border-radius:12px;padding:13px 13px}
+  .b h5{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--nila-700);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .b h5 .i{width:16px;height:16px;border-radius:5px;background:var(--nila-700);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:9px}
+  .b ul{list-style:none;display:flex;flex-direction:column;gap:5px}
+  .b li{font-size:11.5px;color:var(--ink-soft);line-height:1.32;padding-left:11px;position:relative}
+  .b li::before{content:"";position:absolute;left:0;top:7px;width:4px;height:4px;border-radius:50%;background:var(--soga)}
+  .b.rev{background:linear-gradient(180deg,#FFF,#FBF3EA);border-color:var(--garis-strong)}
+  .b.rev h5{color:var(--soga)} .b.rev h5 .i{background:var(--soga)}
+  .b.rev li::before{background:var(--nila-500)}
+  .kp{grid-column:span 2} .ka{grid-column:span 2} .vp{grid-column:span 2} .cr{grid-column:span 2} .cs2{grid-column:span 2}
+  .kr{grid-column:span 2} .ch{grid-column:span 2}
+  .cost{grid-column:span 5} .rev{grid-column:span 5}
+
+  /* ---------- roadmap ---------- */
+  .road{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+  .phase{position:relative;padding:26px 20px 8px;border-top:2px solid var(--garis)}
+  .phase::before{content:"";position:absolute;top:-7px;left:0;width:12px;height:12px;border-radius:50%;background:var(--soga);border:3px solid var(--kertas)}
+  .phase:first-child{padding-left:0}
+  .phase .ph{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--soga)}
+  .phase h4{font-size:15px;font-weight:750;margin:5px 0 8px}
+  .phase p{font-size:12.5px;color:var(--ink-soft);line-height:1.45}
+  .phase .when{font-size:11px;color:var(--ink-mute);margin-top:8px;font-weight:600}
+
+  /* ---------- numbers ---------- */
+  .nums{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .nc{text-align:left}
+  .nc .v{font-size:clamp(26px,3.4vw,38px);font-weight:800;color:var(--nila-700);letter-spacing:-.03em}
+  .nc .v em{font-style:normal;color:var(--soga)}
+  .nc .l{font-size:12.5px;color:var(--ink-soft);margin-top:2px;line-height:1.4}
+
+  /* ---------- footer ---------- */
+  footer{background:var(--nila-900);color:#B7B3CC;border-top:none;padding:44px 0 40px}
+  footer .wrap{display:flex;flex-direction:column;gap:14px}
+  footer .disc{font-size:12.5px;color:#8E8AA6;max-width:70ch;line-height:1.55;border-left:2px solid var(--soga);padding-left:14px}
+  footer b{color:#EDEBF6}
+  .honest{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#F1EAD8;background:rgba(232,106,23,.15);border:1px solid rgba(245,158,66,.3);padding:6px 12px;border-radius:100px;align-self:flex-start}
+
+  @media (max-width:860px){
+    .stat-row{grid-template-columns:repeat(2,1fr)}
+    .duo,.diff,.status-grid,.nums{grid-template-columns:1fr 1fr}
+    .road{grid-template-columns:1fr 1fr}
+    .fit{padding:24px}
+  }
+  @media (max-width:560px){
+    section{padding:48px 0}
+    .stat-row,.duo,.diff,.status-grid,.nums,.road{grid-template-columns:1fr}
+    .wrap{padding:0 20px}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  :focus-visible{outline:2px solid var(--soga);outline-offset:3px;border-radius:4px}
+</style>
+
+<header class="hero">
+  <canvas id="weave" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="badge-row">
+      <span class="badge"><span class="dot"></span>PIDI · Hackathon &amp; Digdaya 2026</span>
+      <span class="badge">Problem Statement #3 — Ekspor Jasa Digital</span>
+      <span class="badge">MVP live · nusalingua.my.id</span>
+    </div>
+    <div class="wordmark">
+      <div class="glyph">N</div>
+      <b>Nusa<i>Lingua</i></b>
+    </div>
+    <h1>AI yang paham bahasa <span class="hl">dan budaya</span> Nusantara.</h1>
+    <p class="k">Platform AI percakapan multibahasa — chat, suara realtime, terjemahan, dan pembuat chatbot no-code — di atas LLM berdaulat Indonesia/ASEAN (SEA-LION &amp; Sahabat-AI).</p>
+    <blockquote class="quote serif">"Coba minta ChatGPT bicara Jawa <i>krama</i> ke simbahmu — pasti salah. Padahal 80 juta orang Jawa berhak dimengerti AI."
+      <span>— Wedge kami: kendali tingkat tutur (krama/ngoko, lemes/loma), bukan sekadar banyak bahasa.</span>
+    </blockquote>
+    <div class="stat-row">
+      <div class="stat"><div class="v num">100<em>+</em></div><div class="l">bahasa di katalog · 8 konteks budaya terkurasi</div></div>
+      <div class="stat"><div class="v">4</div><div class="l">pilar produk: Chat · Voice · Translate · Studio</div></div>
+      <div class="stat"><div class="v num">64<em>/64</em></div><div class="l">assertion E2E business-process lulus</div></div>
+      <div class="stat"><div class="v">Ind.</div><div class="l">AI berdaulat · data bisa di Indonesia</div></div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="shead">
+      <div class="eyebrow">Masalah &amp; Solusi</div>
+      <h2>AI global memarjinalkan penutur bahasa daerah.</h2>
+      <p class="lead">700+ bahasa Nusantara, 270 juta penduduk — tapi AI yang ada memaksa warga tunduk ke bahasa mayoritas, dan mengirim datanya ke luar negeri.</p>
+    </div>
+    <div class="duo">
+      <div class="panel problem">
+        <h3><span class="tag red">Masalah</span></h3>
+        <ul>
+          <li><span class="mk red">1</span><div><b>Salah unggah-ungguh.</b> LLM asing keliru krama/ngoko; bahasa daerah minor tercampur Inggris &amp; harfiah.</div></li>
+          <li><span class="mk red">2</span><div><b>UMKM kehilangan pelanggan.</b> Bot CS kaku — "regane piro mas?" dijawab template formal, pelanggan kabur.</div></li>
+          <li><span class="mk red">3</span><div><b>Chatbot Pemda gagal.</b> Resolution rate &lt;40%, hanya Bahasa Indonesia formal.</div></li>
+          <li><span class="mk red">4</span><div><b>Data keluar negeri.</b> Bertentangan dengan UU PDP &amp; kedaulatan data.</div></li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3><span class="tag grn">Solusi NusaLingua</span></h3>
+        <ul>
+          <li><span class="mk grn">✓</span><div><b>Lapisan aplikasi sadar-budaya</b> di atas LLM berdaulat — konteks tingkat tutur disuntik per bahasa.</div></li>
+          <li><span class="mk grn">✓</span><div><b>Layanan 24/7 tanpa tambah staf</b> untuk UMKM &amp; Pemda, lewat Studio no-code (setup 5 menit).</div></li>
+          <li><span class="mk grn">✓</span><div><b>API "Local Language AI"</b> murah untuk developer — sudut ekspor jasa digital ke ASEAN.</div></li>
+          <li><span class="mk grn">✓</span><div><b>Data di Indonesia + opsi on-prem</b> — selaras Perpres 68/2024 &amp; UU PDP.</div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="fit">
+      <div class="eyebrow">Posisi di PIDI DIGDAYA 2026</div>
+      <h2 style="color:#fff;font-size:clamp(22px,2.8vw,30px);margin-top:9px">Tepat di jantung "Ekspor Jasa Digital".</h2>
+      <div class="chain">
+        <div class="node"><div class="n">Problem Statement #3</div><p>Percepatan Layanan Publik, Ekonomi Kreatif &amp; Ekspor Jasa Digital</p></div>
+        <div class="arrow">→</div>
+        <div class="node"><div class="n">Sub-tema</div><p>Digitalisasi Ekspor Layanan Digital</p></div>
+        <div class="arrow">→</div>
+        <div class="node hot"><div class="n">Acuan #4</div><p><b style="color:#fff">Otomatisasi Layanan Pelanggan Multibahasa</b></p></div>
+        <div class="node hot"><div class="n">Acuan #5</div><p><b style="color:#fff">Local Language AI (LLM)</b></p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="shead">
+      <div class="eyebrow">Bukti, bukan mockup</div>
+      <h2>Yang sudah berfungsi hari ini.</h2>
+      <p class="lead">MVP end-to-end yang benar-benar jalan — diverifikasi langsung dari kode. Lapisan komersial adalah pekerjaan 6 bulan ke depan (kami jujur soal ini).</p>
+    </div>
+    <div class="status-grid">
+      <div class="scard"><div class="top"><h4>Chat teks</h4><span class="chip live">Live</span></div><p>Streaming SSE, kendali tingkat tutur halus/santai, riwayat tersimpan, judul otomatis.</p></div>
+      <div class="scard"><div class="top"><h4>Voice realtime</h4><span class="chip live">Live</span></div><p>Dua arah via WebRTC (OpenAI Realtime) + "Mode Hemat" gratis (Web Speech, biaya ~Rp0).</p></div>
+      <div class="scard"><div class="top"><h4>Terjemahan</h4><span class="chip live">Live</span></div><p>Sadar konteks budaya, auto-deteksi bahasa sumber, 100+ pasangan bahasa.</p></div>
+      <div class="scard"><div class="top"><h4>Studio no-code</h4><span class="chip live">Live (UI)</span></div><p>Kanvas 3-panel, 6 tipe node, simpan/publish bot. Eksekusi flow bercabang: Fase berikutnya.</p></div>
+      <div class="scard"><div class="top"><h4>Auth &amp; katalog bahasa</h4><span class="chip live">Live</span></div><p>Supabase JWT, isolasi antar-user. 108 bahasa ter-seed:</p>
+        <div class="langbar"><span class="lang live">Indonesia</span><span class="lang live">Jawa</span><span class="lang live">Sunda</span><span class="lang live">Batak</span><span class="lang beta">Bugis</span><span class="lang beta">Dayak</span><span class="lang soon">+100 soon</span></div>
+      </div>
+      <div class="scard"><div class="top"><h4>Monetisasi</h4><span class="chip build">Sedang dibangun</span></div><p>Pricing page + trial 14 hari sudah ada. Billing, kuota, &amp; API keys = prioritas Fase 1.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="shead">
+      <div class="eyebrow">Pembeda</div>
+      <h2>Parit pertahanan yang jujur — dan sulit ditiru.</h2>
+    </div>
+    <div class="diff">
+      <div class="dcard"><div class="ic">語</div><h4>Tingkat tutur budaya</h4><p>Krama/ngoko, lemes/loma, tiga tingkat Bali — di-render benar. Jualan martabat, bukan sekadar fitur.</p></div>
+      <div class="dcard"><div class="ic">◫</div><h4>Produk lengkap</h4><p>Chat + voice + translate + studio siap pakai UMKM/Pemda — bukan wrapper LLM asing.</p></div>
+      <div class="dcard"><div class="ic">⛨</div><h4>Kedaulatan data</h4><p>Ditenagai LLM Indonesia/ASEAN, opsi on-prem, data di Indonesia — vendor asing tak bisa penuhi sekaligus.</p></div>
+      <div class="dcard"><div class="ic">⇄</div><h4>Tanpa vendor lock-in</h4><p>Multi-provider OpenAI-compatible (SEA-LION↔Groq↔OpenAI) — bebas pindah model, tekan biaya.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="shead">
+      <div class="eyebrow">Model Bisnis</div>
+      <h2>Business Model Canvas.</h2>
+      <p class="lead">Teks = mesin margin (COGS ~Rp0). Voice = satu biaya nyata, dibatasi kuota. Self-serve murah mendanai sales B2B/B2G.</p>
+    </div>
+    <div class="bmc-scroll">
+      <div class="bmc">
+        <div class="b kp"><h5><span class="i">1</span>Key Partners</h5><ul><li>AI Singapore (SEA-LION)</li><li>GoTo · Indosat (Sahabat-AI)</li><li>Groq · OpenAI (infra model)</li><li>Kampus: UGM/Unpad/Unhas</li><li>Akselerator/VC · Pemda</li></ul></div>
+        <div class="b ka"><h5><span class="i">2</span>Key Activities</h5><ul><li>Orkestrasi &amp; prompt tingkat tutur</li><li>Bangun produk (chat/voice/studio)</li><li>Loop data native speaker</li><li>Compliance &amp; sales B2G</li></ul></div>
+        <div class="b vp"><h5><span class="i">3</span>Value Propositions</h5><ul><li>Paham bahasa <b>&amp; budaya</b> Nusantara</li><li>Krama/ngoko benar</li><li>Layanan CS 24/7 tanpa tambah staf</li><li>Data di Indonesia (kedaulatan)</li><li>API 40–50% &lt; LLM asing</li></ul></div>
+        <div class="b cr"><h5><span class="i">4</span>Customer Relationships</h5><ul><li>Self-serve + komunitas Discord/WA</li><li>Trial 14 hari → konversi</li><li>Success manager (enterprise)</li><li>QBR (B2G/B2B)</li></ul></div>
+        <div class="b cs2"><h5><span class="i">5</span>Customer Segments</h5><ul><li>UMKM (CS bahasa daerah)</li><li>Pemda/K-L (B2G)</li><li>Enterprise/bank (B2B)</li><li>Developer (API)</li><li>Content creator</li></ul></div>
+        <div class="b kr"><h5><span class="i">6</span>Key Resources</h5><ul><li>Codebase MVP live</li><li>Katalog 100+ bahasa + prompt budaya</li><li>Data &amp; komunitas native speaker</li><li>Brand &amp; konten</li></ul></div>
+        <div class="b ch"><h5><span class="i">7</span>Channels</h5><ul><li>nusalingua.my.id</li><li>Reels/TikTok (UMKM)</li><li>Twitter/GitHub (developer)</li><li>Tender LKPP · event Smart City (B2G)</li></ul></div>
+        <div class="b cost"><h5><span class="i">8</span>Cost Structure</h5><ul><li>Inferensi teks ~Rp0 (SEA-LION/Groq free) · voice realtime ~Rp4.800/mnt (biaya nyata utama, dibatasi kuota)</li><li>Infra rendah (VPS + Supabase) · Compliance Y1 Rp350–810jt (DPO, ISO 27001, pentest = moat B2G) · SDM &amp; akuisisi</li></ul></div>
+        <div class="b rev rev"><h5><span class="i">9</span>Revenue Streams</h5><ul><li>Subscription: Pro Rp49rb/bln (trial 14 hari)</li><li>API pay-as-you-go: chat Rp12/1k token · terjemah Rp20/1k karakter · voice Rp7rb/mnt</li><li>Enterprise/B2G kontrak: Rp200jt–5M/tahun + opsi on-prem</li></ul></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="shead">
+      <div class="eyebrow">Rencana Kerja</div>
+      <h2>Dari MVP jalan → pilot berpendapatan, 6 bulan.</h2>
+    </div>
+    <div class="road">
+      <div class="phase"><div class="ph">Fase 1</div><h4>Monetisasi dasar</h4><p>Billing (Xendit/Midtrans) + enforcement kuota + API keys + rate limit. MVP bisa menagih.</p><div class="when">Bulan 1–2</div></div>
+      <div class="phase"><div class="ph">Fase 2</div><h4>Validasi &amp; pilot</h4><p>3–5 pilot UMKM + 1–2 Pemda, beta API 20 developer, uji A/B ketepatan bahasa ≥70%.</p><div class="when">Bulan 2–4</div></div>
+      <div class="phase"><div class="ph">Fase 3</div><h4>Skala &amp; compliance</h4><p>Eksekusi flow Studio + deploy WhatsApp, PSE/PT/NIB, data residency Indonesia, MRR pertama.</p><div class="when">Bulan 4–6</div></div>
+      <div class="phase"><div class="ph">Fase 4</div><h4>R&amp;D kedaulatan</h4><p>Opsional bila ada dana: fine-tune ringan (LoRA) bahasa daerah + kemitraan riset BRIN/kampus.</p><div class="when">&gt; 6 bulan</div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="shead">
+      <div class="eyebrow">Angka Kunci <span style="color:var(--ink-mute);font-weight:600;text-transform:none;letter-spacing:0">· target &amp; ilustratif</span></div>
+      <h2>Skala peluang &amp; target traksi.</h2>
+    </div>
+    <div class="nums">
+      <div class="nc"><div class="v num">65<em>jt</em></div><div class="l">UMKM Indonesia — segmen CS bahasa daerah</div></div>
+      <div class="nc"><div class="v num">542</div><div class="l">pemda + K/L sebagai target layanan publik B2G</div></div>
+      <div class="nc"><div class="v num">1.000<em>+</em></div><div class="l">developer API aktif — target 6–12 bulan</div></div>
+      <div class="nc"><div class="v">±730%<em></em></div><div class="l">ROI ilustratif per mitra · payback &lt;1 bulan*</div></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="honest">◇ Jujur by design</span>
+    <p class="disc"><b>Positioning:</b> NusaLingua adalah <b>lapisan aplikasi &amp; orkestrasi</b> di atas LLM berdaulat (SEA-LION/Sahabat-AI) — bukan foundation-model builder. Parit kami ada di lapisan produk, budaya, distribusi, &amp; data komunitas. *Angka finansial &amp; ROI bertanda ilustratif dan perlu validasi willingness-to-pay sebelum jadi klaim keras.</p>
+    <p style="font-size:13px;color:#9D99B4"><b>NusaLingua</b> — Suara Indonesia dalam Satu Platform · Kelompok 10 · Lead: Albert Ade Kristadeo · PIDI DIGDAYA &amp; Hackathon 2026</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var c=document.getElementById('weave'); if(!c) return;
+  var x=c.getContext('2d'), DPR=Math.min(window.devicePixelRatio||1,2), W,H;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  function size(){ W=c.clientWidth; H=c.clientHeight; c.width=W*DPR; c.height=H*DPR; x.setTransform(DPR,0,0,DPR,0,0); }
+  // Kawung-inspired woven lattice: intersecting diamonds, very subtle.
+  function draw(t){
+    x.clearRect(0,0,W,H);
+    var s=46, r=8.5;
+    for(var gy=-1; gy*s<H+s; gy++){
+      for(var gx=-1; gx*s<W+s; gx++){
+        var px=gx*s, py=gy*s;
+        var d=Math.sin((gx*0.6+gy*0.6)+t*0.0006)*0.5+0.5;
+        x.beginPath();
+        x.arc(px, py, r+ d*1.6, 0, Math.PI*2);
+        x.strokeStyle='rgba(245,158,66,'+(0.05+d*0.06)+')';
+        x.lineWidth=1; x.stroke();
+        x.beginPath();
+        x.arc(px+s/2, py+s/2, r*0.5, 0, Math.PI*2);
+        x.fillStyle='rgba(224,222,240,0.05)'; x.fill();
+      }
+    }
+  }
+  function loop(t){ draw(t); if(!reduce) requestAnimationFrame(loop); }
+  function init(){ size(); reduce?draw(0):requestAnimationFrame(loop); }
+  window.addEventListener('resize', function(){ size(); if(reduce) draw(0); });
+  init();
+})();
+</script>
